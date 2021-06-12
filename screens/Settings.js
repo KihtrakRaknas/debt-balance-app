@@ -17,13 +17,9 @@ export default function Settings({ navigation }) {
             setName(doc.data()?.name)
         })
     },[true])
-
-    const submit = ()=>{
-        profileRef.set({name})
-    }
     
-    return (<ImageBackground source={require("../assets/debt-balance-splash.png")} style={{flex: 1,resizeMode: "cover",justifyContent: "center"}}><KeyboardAvoidingView style={[styles.container]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <View style={[styles.textContainer,{marginBottom: 30,marginTop:30}]}><Text style={styles.titleText}>Set Up</Text></View>
+    return (<LinearGradient colors={['#00ff0030', '#00ff0010']} style={{flex: 1,resizeMode: "cover",justifyContent: "center"}}><KeyboardAvoidingView style={[styles.container]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <View style={[styles.textContainer,{marginBottom: 30,marginTop:30}]}><Text style={styles.titleText}>Settings</Text></View>
             {message.text && <View style={[styles.textContainer,{margin:10}]}><Text
                 style={{
                     color: message.color || 'blue',
@@ -33,7 +29,7 @@ export default function Settings({ navigation }) {
                 }}>
                 {message.text}
             </Text></View>}
-            <View style={styles.textContainer}><Text style={styles.subtitleText}>We could not find an account connected to that number. Enter your name to create an account.</Text></View>
+            {/* <View style={styles.textContainer}><Text style={styles.subtitleText}>Change your name or sign out</Text></View> */}
             <TextInput
                 style={{ marginVertical: 10, fontSize: 17 }}
                 placeholder="Name"
@@ -43,13 +39,16 @@ export default function Settings({ navigation }) {
                     setName(text)
                 }}
                 value={name}
-                onSubmitEditing={submit}
+                onSubmitEditing={()=>{
+                    profileRef.update({name})
+                }}
                 returnKeyType={"done"}
             />
-            <TouchableOpacity style={[styles.confirmButtonContainer]} onPress={submit} >
-                <Text style={styles.confirmButtonText}>Create Account</Text>
+            <View style={{width:'95%',height:3, backgroundColor:'grey', borderRadius:10}}></View>
+            <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={()=>firebase.auth().signOut()} >
+                <Text style={styles.confirmButtonText}>Sign Out</Text>
             </TouchableOpacity>
-        </KeyboardAvoidingView></ImageBackground>)
+        </KeyboardAvoidingView></LinearGradient>)
 }
 
 const styles = StyleSheet.create({
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         padding: 10,
         backgroundColor:"white",
-        // marginBottom:50
+        marginBottom:50
     },
     titleText: {
         fontSize: 70,
@@ -83,7 +82,6 @@ const styles = StyleSheet.create({
         paddingTop:0,
         padding:10,
         borderRadius:15,
-        marginHorizontal:20
     },
     subtitleText: {
         fontSize: 20,
@@ -92,17 +90,17 @@ const styles = StyleSheet.create({
         marginTop:5,
         color:"white",
     },
-    confirmButtonContainer: {
+    cancelButtonContainer: {
         // marginTop: 50,
         borderWidth: 1,
         borderRadius: 5,
         padding: 10,
-        backgroundColor: "blue",
+        backgroundColor: "pink",
         marginBottom: 10,
         paddingHorizontal: 30,
         alignSelf: 'stretch',
         marginHorizontal:50,
-        marginTop:30
+        marginTop:50
     },
     confirmButtonText: {
         fontSize: 22,

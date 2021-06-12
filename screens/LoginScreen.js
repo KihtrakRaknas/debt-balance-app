@@ -164,6 +164,7 @@ const styles = StyleSheet.create({
         paddingTop:0,
         padding:10,
         borderRadius:15,
+        marginHorizontal:20,
     },
     subtitleText: {
         fontSize: 20,

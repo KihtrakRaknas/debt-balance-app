@@ -9,27 +9,42 @@ import * as Contacts from 'expo-contacts';
 import { LinearGradient } from 'expo-linear-gradient';
 import FacePile from 'react-native-face-pile'
 
+
 export default function GroupListScreen({ navigation }) {
     const [groups, setGroups] = React.useState([]);
     const [add, setAdd] = React.useState(false)
     const [contacts, setContacts] = React.useState([])
+    const [membersToAdd, setMembers] = React.useState([])
     const db = firebase.firestore();
+    const countryTelData = require('country-telephone-data')
+
+    const nameOfNumberInContacts = Platform.OS == "ios"?"digits":"number"
+
+    const cleanNumber=(number)=>{
+       return number.replace(/[^0-9]/g,'')
+    }
 
     React.useEffect(() => {
         (async () => {
             const { status } = await Contacts.requestPermissionsAsync();
             if (status === 'granted') {
                 const { data } = await Contacts.getContactsAsync({
-                    fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image],
+                    fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image, Contacts.Fields.Name],
                 });
                 if (data.length > 0) {
                     let array = []
                     data.forEach((el, ind) => {
                         array.push(el)
                     })
+                    console.log(array[0])
                     setContacts(array)
-                    if (ind == 0)
-                        console.log(person)
+                    let contactsPromises = []
+                    for(let contact in array){
+                        countryTelData.iso2Lookup[contact.phoneNumber]
+                        const doc = firestore().collection('Users').doc(contact).get().then(doc=>{doc.exists});
+                        contactsPromises.push(doc)
+                    }
+                    await Promise.all(contactsPromises)
                 }
             }
         })();
@@ -60,7 +75,6 @@ export default function GroupListScreen({ navigation }) {
         }
     }, []);
 
-
     return (<View style={styles.container}>
         <Modal
             animationType="slide"
@@ -81,7 +95,11 @@ export default function GroupListScreen({ navigation }) {
                         placeholder={"Search"}
                         placeholderTextColor={'#757575'}
                         returnValue={"label"} // label or value
-                        callback={(res) => { console.log(res) }} // callback, array of selected items
+                        callback={(res) => { 
+                            console.log("test "+JSON.parse(
+                                contacts.find(el=>el.name===res[res.length-1])
+                            ))
+                         }} // callback, array of selected items
                         rowBackgroundColor={"#eee"}
                         rowRadius={5}
                         searchIconName="ios-checkmark"
@@ -91,6 +109,10 @@ export default function GroupListScreen({ navigation }) {
                         iconSize={30}
                         selectedIconName={"ios-checkmark-circle-outline"}
                         unselectedIconName={"ios-radio-button-off-outline"}
+                    />
+                    <Button
+                    title="Create Group"
+                    color="#841584"
                     />
                 </View>
             </TouchableOpacity>
@@ -114,7 +136,7 @@ export default function GroupListScreen({ navigation }) {
                 title = title.substring(0, title.length - 2)
                 const unusedMembers = (memberUIDs.length - 1) - lastIndexUsed
 
-                const balance = item.members[firebase.auth().currentUser.uid]?.balance
+                const balance = item.members[firebase.auth().currentUser.phoneNumber]?.balance
 
                 const faces = memberUIDs.map(number => {
                     const digits = number.substring(number.length - 10, number.length)
@@ -123,11 +145,12 @@ export default function GroupListScreen({ navigation }) {
                         if (!el)
                             return false
                         return el?.phoneNumbers?.some(el => {
-                            const elDigits = el?.digits
-                            return elDigits?.substring(elDigits.length - 10, elDigits.length) == digits
+                            const elDigits = ""+el?.[nameOfNumberInContacts]
+                            return elDigits.substring(elDigits.length - 10, elDigits.length) == digits
                         })
                     })
-                    const image = contact?.image?.uri?contact.image?.uri:require('../assets/icon.png')
+                    console.log(contact)
+                    const image = contact?.image?.uri // contact?.image?.uri?contact.image?.uri:require('../assets/icon.png')
                     console.log(image)
                     return ({
                         id: number,
@@ -157,7 +180,7 @@ export default function GroupListScreen({ navigation }) {
                                 <ListItem.Subtitle style={styles.listItemSubtitle}>{item.transactionsLength} transactions so far!</ListItem.Subtitle>}
                         </ListItem.Content>
                         <View style={[styles.textContainer, { backgroundColor: balance < 0 ? 'red' : 'green' }]}><Text>${Math.abs(balance)}</Text></View>
-                        <ListItem.Chevron />
+                        {/* <ListItem.Chevron /> */}
                     </ListItem>
                 )
             }}
