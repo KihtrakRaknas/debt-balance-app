@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert, Dimensions, ImageBackground, Keyboard} from 'react-native';
-import { ListItem, Avatar, Badge } from 'react-native-elements';
+import {ActivityIndicator, StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert, Dimensions, ImageBackground, Keyboard} from 'react-native';
+import { ListItem, Avatar, Badge, Icon } from 'react-native-elements';
 // import { ChatItem } from 'react-chat-elements'
 import * as firebase from 'firebase';
 import { FAB } from 'react-native-paper';
@@ -38,7 +38,7 @@ export default function GroupSummary({ navigation, route }) {
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
-            headerStyle: {backgroundColor: oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',}
+            headerStyle: {backgroundColor: isNaN(balance)?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',}
         });
     }, [balance,navigation]);
 
@@ -172,8 +172,8 @@ export default function GroupSummary({ navigation, route }) {
 
         <View style={styles.containerStyle} >
             <View style={styles.sliderContainerStyle} >
-                <ImageBackground style={styles.slider} source={oweMoney?require("../assets/debt-balance-splash-red.png"):require("../assets/debt-balance-splash.png")} blurRadius={6}>
-                    <Text style={styles.largeText} adjustsFontSizeToFit>{displayMoney(balance)}</Text>
+                <ImageBackground style={styles.slider} source={isNaN(displayMoney(balance).substring(1))?null:oweMoney?require("../assets/debt-balance-splash-red.png"):require("../assets/debt-balance-splash.png")} blurRadius={6}>
+                    <Text style={styles.largeText} adjustsFontSizeToFit>{isNaN(displayMoney(balance).substring(1))? <ActivityIndicator size="large" color="#00ff00" />:displayMoney(balance)}</Text>
                 </ImageBackground>
             </View>
         </View>
@@ -224,6 +224,9 @@ export default function GroupSummary({ navigation, route }) {
                                 status={"secondary"}
                                 value={new Date(item?.timestamp).toLocaleDateString()}
                                 containerStyle={{ marginBottom: -20 }}
+                            />
+                            <Icon
+                                name='closecircle'
                             />
                         </View>
                     </ListItem>
@@ -279,7 +282,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left:-5,
         marginLeft: window.width / 2,
-        backgroundColor: 'green',
+        backgroundColor: 'white',
         alignItems:'center',
         justifyContent:'center'
     },

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { StyleSheet, Text, View, LogBox, Platform } from 'react-native';
 import LoginScreen from './screens/LoginScreen'
 import * as firebase from 'firebase'
@@ -11,6 +11,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Contacts from 'expo-contacts';
 import { Icon } from 'react-native-elements'
+import * as Notifications from 'expo-notifications';
 LogBox.ignoreLogs([""]);
 
 global.firebaseConfig = {
@@ -34,7 +35,19 @@ export default function App() {
   const [signedIn, setSignedIn] = useState(null);
   const [userAccountSetUp, setUserAccountSetUp] = useState(null);
   const [contacts, setContacts] = useState([])
+  const responseListener = useRef();
   const db = firebase.firestore();
+  
+  useEffect(()=>{
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log("res received")
+      console.log(response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  },[true])
 
   useEffect(() => {
     //Check if user is singed in

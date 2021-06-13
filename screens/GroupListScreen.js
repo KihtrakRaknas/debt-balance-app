@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert, Platform } from 'react-native';
 import { ListItem, Avatar, Badge } from 'react-native-elements';
-// import { ChatItem } from 'react-chat-elements'
 import * as firebase from 'firebase';
 import { FAB } from 'react-native-paper';
 import CustomMultiPicker from "react-native-multiple-select-list";
@@ -9,6 +8,8 @@ import * as Contacts from 'expo-contacts';
 import { LinearGradient } from 'expo-linear-gradient';
 import FacePile from 'react-native-face-pile'
 import displayMoney from '../helpers/displayMoney'
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 export default function GroupListScreen({ navigation }) {
     const [groups, setGroups] = React.useState([]);
@@ -25,7 +26,39 @@ export default function GroupListScreen({ navigation }) {
             return "+"+number.replace(/[^0-9]/g, '')
         return "+1"+number.replace(/[^0-9]/g, '')
     }
-
+    useEffect(()=>{
+        (async()=>{
+        console.log("running notif code")
+          if (Constants.isDevice) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            if (existingStatus !== 'granted') {
+              const { status } = await Notifications.requestPermissionsAsync();
+              finalStatus = status;
+            }
+            if (finalStatus !== 'granted') {
+              alert('Failed to get push token for push notification!');
+              return;
+            }
+            console.log("got notif perms")
+            const token = (await Notifications.getExpoPushTokenAsync()).data;
+            console.log("token ",token);
+            db.collection('Users').doc(firebase.auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayUnion(token) });
+          } else {
+            alert('Must use physical device for Push Notifications');
+          }
+        
+          if (Platform.OS === 'android') {
+            Notifications.setNotificationChannelAsync('default', {
+              name: 'default',
+              importance: Notifications.AndroidImportance.MAX,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: '#FF231F7C',
+            });
+          }
+        })();
+    },[true])
+    
     React.useEffect(() => {
         (async () => {
             const { status } = await Contacts.requestPermissionsAsync();
@@ -85,7 +118,7 @@ export default function GroupListScreen({ navigation }) {
                         setGroups((groups) => {
                             const indToDel = groups.findIndex(el=>el.groupID == groupID)
                             if(indToDel != -1)
-                                groups = groups.splice(indToDel,1)
+                                groups.splice(indToDel,1)
                             return([...groups, { members, transactionsLength: transactions.length, groupID }].sort((a, b) => b?.transactionsLength - a?.transactionsLength))
                         })
                     } else {
