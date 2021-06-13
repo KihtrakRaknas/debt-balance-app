@@ -214,7 +214,7 @@ export default function GroupSummary({ navigation, route }) {
                             <ListItem.Title style={styles.listItemTitle}><Text style={{color:"blue"}}>{groupInfo?.members?.[item?.sender]?.name}</Text> 👉 {item?.recipients.map(number=>groupInfo?.members?.[number]?.name)?.join(", ")}</ListItem.Title>
                             <ListItem.Subtitle style={styles.listItemSubtitle}>{item?.description}</ListItem.Subtitle>
                         </ListItem.Content>
-                        <View style={{}}>
+                        <View style={{flexDirection:"column"}}>
                             <Badge
                                 status={"primary"}
                                 value={displayMoney(item?.amount)}
@@ -225,9 +225,31 @@ export default function GroupSummary({ navigation, route }) {
                                 value={new Date(item?.timestamp).toLocaleDateString()}
                                 containerStyle={{ marginBottom: -20 }}
                             />
-                            <Icon
-                                name='closecircle'
-                            />
+                        </View>
+                        <View style={{flexDirection:"column"}}>
+                        {
+                            !item.isIOU && item.timestamp + 1000*60*60*24*5 > new Date().getTime()? <Icon
+                            name='closecircle'
+                            type='antdesign'
+                            onPress={() =>{
+                                Alert.alert(`Decline transaction`, `Someone has claimed you owe them money, would you like to decline this?`,
+                                    [{
+                                        text: 'Decline',
+                                        onPress: async () => {
+                                            groupInfo.transactions[index].active = false
+                                            console.log(`removing index: ${index}`)
+                                            await groupRef.update({
+                                                transactions:groupInfo.transactions
+                                            })
+                                        },
+                                        style: "destructive"
+                                    }, { text: 'Cancel', style: 'cancel' },],
+                                    { cancelable: true }
+                                );
+                            }}
+                            // containerStyle={{ marginTop: -30 }}
+                            />:null
+                        }
                         </View>
                     </ListItem>
                 )

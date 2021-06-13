@@ -97,7 +97,7 @@ export default function SignUpScreen({ navigation }) {
                         setValidNumber(checkValid)
                     }}
                     withShadow
-                    autoFocus
+                    autoFocus={false}
                 />
                 <FirebaseRecaptchaVerifierModal
                     ref={recaptchaVerifier}

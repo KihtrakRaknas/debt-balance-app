@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert, Platform } from 'react-native';
 import { ListItem, Avatar, Badge } from 'react-native-elements';
 import * as firebase from 'firebase';
@@ -10,12 +10,14 @@ import FacePile from 'react-native-face-pile'
 import displayMoney from '../helpers/displayMoney'
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import {MainStackLoadedContext} from '../helpers/contexts'
 
 export default function GroupListScreen({ navigation }) {
     const [groups, setGroups] = React.useState([]);
     const [add, setAdd] = React.useState(false)
     const [contacts, setContacts] = React.useState([])
     const [membersToAdd, setMembers] = React.useState([])
+    const mainStackLoadedRef = useContext(MainStackLoadedContext)
     const db = firebase.firestore();
     const countryTelData = require('country-telephone-data')
 
@@ -26,6 +28,13 @@ export default function GroupListScreen({ navigation }) {
             return "+"+number.replace(/[^0-9]/g, '')
         return "+1"+number.replace(/[^0-9]/g, '')
     }
+
+    useLayoutEffect(()=>{
+        mainStackLoadedRef.current.mainStackLoaded()
+        // navigation.navigate('Summary',{groupUid: mainStackLoadedRef.current.groupID})
+    }, [true])
+
+
     useEffect(()=>{
         (async()=>{
         console.log("running notif code")

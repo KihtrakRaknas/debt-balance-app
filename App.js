@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState, useEffect, useRef} from 'react';
-import { StyleSheet, Text, View, LogBox, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { StyleSheet, Text, View, LogBox, Platform, Alert } from 'react-native';
 import LoginScreen from './screens/LoginScreen'
 import * as firebase from 'firebase'
 import GroupListScreen from './screens/GroupListScreen'
@@ -12,6 +12,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import * as Contacts from 'expo-contacts';
 import { Icon } from 'react-native-elements'
 import * as Notifications from 'expo-notifications';
+import { MainStackLoadedContext } from './helpers/contexts'
+import * as SplashScreen from 'expo-splash-screen';
 LogBox.ignoreLogs([""]);
 
 global.firebaseConfig = {
@@ -27,7 +29,7 @@ global.firebaseConfig = {
 try {
   firebase.initializeApp(firebaseConfig);
 } catch (err) {
-    // ignore app already initialized error in stack
+  // ignore app already initialized error in stack
 }
 
 
@@ -36,37 +38,55 @@ export default function App() {
   const [userAccountSetUp, setUserAccountSetUp] = useState(null);
   const [contacts, setContacts] = useState([])
   const responseListener = useRef();
+  const notificationListener = useRef();
+  const mainStackLoadedRef = useRef({
+    mainStackLoaded: () => {
+      setTimeout(() => SplashScreen.hideAsync().catch(), 500)
+      mainStackLoadedRef.current.loaded = true
+    },
+    loaded: false,
+    groupID: null
+  });
   const db = firebase.firestore();
-  
-  useEffect(()=>{
+
+  useLayoutEffect(() => {
+    SplashScreen.preventAutoHideAsync();
+
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      const groupID = response.notification.request.content.data?.groupID
       console.log("res received")
-      console.log(response);
+      console.log(groupID);
+      mainStackLoadedRef.current.groupID = groupID
+    });
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log(notification);
     });
 
     return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
       Notifications.removeNotificationSubscription(responseListener.current);
     };
-  },[true])
+  }, [true])
 
   useEffect(() => {
     //Check if user is singed in
-    firebase.auth().onAuthStateChanged((user)=>{
+    firebase.auth().onAuthStateChanged((user) => {
       setSignedIn(!!user)
       if (user) {
         console.log(",user is signed in")
         // User is signed in.
         const profileRef = db.collection("Users").doc(user.phoneNumber);
         const profileSubscription = profileRef.onSnapshot({
-            // Listen for document metadata changes
-            includeMetadataChanges: true
-          },(doc) => {
+          // Listen for document metadata changes
+          includeMetadataChanges: true
+        }, (doc) => {
           console.log("profileSubscription fired")
-          if(!doc.exists){
+          if (!doc.exists) {
             console.log("No profile found")
             return setUserAccountSetUp(false)
           }
-          if(!doc.metadata.hasPendingWrites){
+          if (!doc.metadata.hasPendingWrites) {
             profileSubscription(); // Unsubscribe listener
             console.log("Profile found")
             setUserAccountSetUp(true)
@@ -75,46 +95,59 @@ export default function App() {
       } else {
         // No user is signed in.
       }
-    });    
+    });
   }, [true]);
 
-  console.log({signedIn,userAccountSetUp})
+  console.log({ signedIn, userAccountSetUp })
   const Stack = createStackNavigator();
 
 
   return (
-    <NavigationContainer screenOptions={{headerShown:true}}>
-        {!signedIn? (
+    <NavigationContainer screenOptions={{ headerShown: true }}>
+      <MainStackLoadedContext.Provider value={mainStackLoadedRef}>
+        {!signedIn ? (
           <Stack.Navigator>
-            <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
           </Stack.Navigator>
-        ) : userAccountSetUp? (
+        ) : userAccountSetUp ? (
           <Stack.Navigator screenOptions={{
             headerStyle: {
               backgroundColor: 'green'
             },
             headerTitleStyle: {
-              color:"white",
+              color: "white",
               fontWeight: 'bold',
             }
-            }}>
-            <Stack.Screen name="Dashboard" component={GroupListScreen} options={ ({ navigation, route }) => ({headerShown: true, headerLeft:()=>(<Icon name='settings' type='feather' color='green' style={styles.leftHeaderIcon} onPress={()=>navigation.navigate('Settings')}/>), headerStyle:{ borderBottomColor: 'transparent',
-              shadowColor: 'transparent'},headerTitleStyle: {
-                color:"green",
+          }}>
+            <Stack.Screen name="Dashboard" component={GroupListScreen} options={({ navigation, route }) => ({
+              headerShown: true, headerLeft: () => (<Icon name='settings' type='feather' color='green' style={styles.leftHeaderIcon} onPress={() => navigation.navigate('Settings')} />), headerStyle: {
+                borderBottomColor: 'transparent',
+                shadowColor: 'transparent'
+              }, headerTitleStyle: {
+                color: "green",
                 fontWeight: 'bold',
-              }})}/>
-            <Stack.Screen name="Settings" component={Settings} options={{headerShown: true,headerTitle:'',headerStyle:{backgroundColor:"#50ff5060", borderBottomColor: 'transparent',
-              shadowColor: 'transparent'}}}/>
-            <Stack.Screen name="Summary" component={GroupSummary} options={{headerShown: true, headerStyle: {backgroundColor: '#00ff0090', borderBottomColor: 'transparent',
-              shadowColor: 'transparent',
-            },}}/>
+              }
+            })} />
+            <Stack.Screen name="Settings" component={Settings} options={{
+              headerShown: true, headerTitle: '', headerStyle: {
+                backgroundColor: "#50ff5060", borderBottomColor: 'transparent',
+                shadowColor: 'transparent'
+              }
+            }} />
+            <Stack.Screen name="Summary" component={GroupSummary} options={{
+              headerShown: true, headerStyle: {
+                backgroundColor: '#00ff0090', borderBottomColor: 'transparent',
+                shadowColor: 'transparent',
+              },
+            }} />
           </Stack.Navigator>
-        ):(
+        ) : (
           <Stack.Navigator>
-            <Stack.Screen name="SetUpScreen" component={SetUpScreen} options={{headerShown: false}} />
+            <Stack.Screen name="SetUpScreen" component={SetUpScreen} options={{ headerShown: false }} />
           </Stack.Navigator>
         )}
-      <StatusBar style="auto" />
+        <StatusBar style="auto" />
+      </MainStackLoadedContext.Provider>
     </NavigationContainer>
   );
 }
@@ -126,7 +159,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  leftHeaderIcon:{
-    marginLeft:10
+  leftHeaderIcon: {
+    marginLeft: 10
   }
 });
