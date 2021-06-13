@@ -8,7 +8,7 @@ import CustomMultiPicker from "react-native-multiple-select-list";
 import * as Contacts from 'expo-contacts';
 import { LinearGradient } from 'expo-linear-gradient';
 import FacePile from 'react-native-face-pile'
-
+import displayMoney from '../helpers/displayMoney'
 
 export default function GroupListScreen({ navigation }) {
     const [groups, setGroups] = React.useState([]);
@@ -18,10 +18,12 @@ export default function GroupListScreen({ navigation }) {
     const db = firebase.firestore();
     const countryTelData = require('country-telephone-data')
 
-    const nameOfNumberInContacts = Platform.OS == "ios"?"digits":"number"
+    const nameOfNumberInContacts = Platform.OS == "ios" ? "digits" : "number"
 
-    const cleanNumber=(number)=>{
-       return number.replace(/[^0-9]/g,'')
+    const cleanNumber = (number) => {
+        if(number.replace(/[^0-9]/g, '').length>10)
+            return "+"+number.replace(/[^0-9]/g, '')
+        return "+1"+number.replace(/[^0-9]/g, '')
     }
 
     React.useEffect(() => {
@@ -32,46 +34,68 @@ export default function GroupListScreen({ navigation }) {
                     fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image, Contacts.Fields.Name],
                 });
                 if (data.length > 0) {
+                    setContacts(data)
                     let array = []
-                    data.forEach((el, ind) => {
-                        array.push(el)
+                    let promises=[]
+                    let seen = []
+                    data.forEach((contact, ind) => {
+                        if(contact.phoneNumbers){
+                            for(let phoneNumberIndex in contact.phoneNumbers){
+                                let number=cleanNumber(contact.phoneNumbers[phoneNumberIndex][nameOfNumberInContacts])
+                                if(number==firebase.auth().currentUser.phoneNumber)
+                                    continue;
+                                promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
+                                    if(text == "true"&&!seen.includes(number)){
+                                        console.log("Exists "+number)
+                                        array.push(contact)
+                                        seen.push(number)
+                                    }
+                                }))                  
+                            }
+                        }
                     })
-                    console.log(array[0])
-                    setContacts(array)
+                    Promise.all(promises).then(()=>{
+                        setContacts(array)
+                    })
                     let contactsPromises = []
-                    for(let contact in array){
-                        countryTelData.iso2Lookup[contact.phoneNumber]
-                        const doc = firestore().collection('Users').doc(contact).get().then(doc=>{doc.exists});
-                        contactsPromises.push(doc)
+                    for (let contact in array) {
+                        //console.log(contact)
+                        // countryTelData.iso2Lookup[contact.phoneNumber]
+                        // const doc = firestore().collection('Users').doc(contact).get().then(doc => { doc.exists });
+                        // contactsPromises.push(doc)
                     }
-                    await Promise.all(contactsPromises)
+                    //await Promise.all(contactsPromises)
                 }
             }
         })();
         // props.contacts.forEach((el)=>{
         //     setContacts([...contacts, el.firstName])
         // })
-        if (firebase.auth().currentUser) {
-            const user = firebase.auth().currentUser
-            const profileRef = db.collection("Users").doc(user.phoneNumber);
-            profileRef.onSnapshot((doc) => {
-                setGroups([])
-                doc.data().groups.forEach(groupID => {
-                    console.log(groupID)
-                    const docRef = db.collection("Groups").doc(groupID);
-                    docRef.get().then((doc) => {
-                        if (doc.exists) {
-                            const { members, transactions } = doc.data()
-                            setGroups((groups) => [...groups, { members, transactionsLength: transactions.length }].sort((a, b) => a?.transactionsLength - b?.transactionsLength))
-                        } else {
-                            // doc.data() will be undefined in this case
-                            console.log("No such document!");
-                        }
-                    }).catch((error) => {
-                        console.log("Error getting document:", error);
-                    });
+
+        const user = firebase.auth().currentUser
+        const profileRef = db.collection("Users").doc(user.phoneNumber);
+        let listeners = []
+        const profileListener = profileRef.onSnapshot((doc) => {
+            setGroups([])
+            doc.data().groups.forEach(groupID => {
+                const docRef = db.collection("Groups").doc(groupID);
+                const listener = docRef.onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const { members, transactions } = doc.data()
+                        setGroups((groups) => [...groups, { members, transactionsLength: transactions.length, groupID }].sort((a, b) => b?.transactionsLength - a?.transactionsLength))
+                    } else {
+                        // doc.data() will be undefined in this case
+                        console.log("No such document!");
+                    }
                 })
+                listeners.push(listener)
             })
+        })
+        listeners.push(profileListener)
+        return ()=>{
+            for(let listenerIndex in listeners){
+                listeners[listenerIndex]()
+            }
         }
     }, []);
 
@@ -95,11 +119,16 @@ export default function GroupListScreen({ navigation }) {
                         placeholder={"Search"}
                         placeholderTextColor={'#757575'}
                         returnValue={"label"} // label or value
-                        callback={(res) => { 
-                            console.log("test "+JSON.parse(
-                                contacts.find(el=>el.name===res[res.length-1])
-                            ))
-                         }} // callback, array of selected items
+                        callback={(res) => {
+                            setMembers([])
+                            res.forEach(name=>{
+                                let contact=contacts.find(el=>el.name==name)
+                                if(contact&&contact.phoneNumbers){
+                                    setMembers([...membersToAdd, cleanNumber(contact.phoneNumbers[0][nameOfNumberInContacts])])
+                                }
+                            })
+                            console.log("members"+membersToAdd)
+                        }} // callback, array of selected items
                         rowBackgroundColor={"#eee"}
                         rowRadius={5}
                         searchIconName="ios-checkmark"
@@ -111,8 +140,18 @@ export default function GroupListScreen({ navigation }) {
                         unselectedIconName={"ios-radio-button-off-outline"}
                     />
                     <Button
-                    title="Create Group"
-                    color="#841584"
+                        onPress={()=>{
+                            const body = { numbers: [...membersToAdd,firebase.auth().currentUser.phoneNumber] };
+                            fetch('https://makegroup.herokuapp.com/', {
+                                    method: 'post',
+                                    body:    JSON.stringify(body),
+                                    headers: { 'Content-Type': 'application/json' },
+                                })
+                                .then(res => res.json())
+                                .then(json => setAdd(false));
+                        }}
+                        title="Create Group"
+                        color="#841584"
                     />
                 </View>
             </TouchableOpacity>
@@ -127,6 +166,8 @@ export default function GroupListScreen({ navigation }) {
                 let lastIndexUsed = 0
                 for (let index in memberUIDs) {
                     const member = memberUIDs[index]
+                    if(member == firebase.auth().currentUser.phoneNumber)
+                        continue;
                     const name = item.members[member]?.name
                     if (title.length + name.length > 30)
                         break;
@@ -138,30 +179,31 @@ export default function GroupListScreen({ navigation }) {
 
                 const balance = item.members[firebase.auth().currentUser.phoneNumber]?.balance
 
-                const faces = memberUIDs.map(number => {
+                const faces = memberUIDs.filter(el=>el!=firebase.auth().currentUser.phoneNumber).map(number => {
                     const digits = number.substring(number.length - 10, number.length)
-                    console.log("digits: " + digits)
                     const contact = contacts.find(el => {
                         if (!el)
                             return false
                         return el?.phoneNumbers?.some(el => {
-                            const elDigits = ""+el?.[nameOfNumberInContacts]
+                            const elDigits = "" + el?.[nameOfNumberInContacts]
                             return elDigits.substring(elDigits.length - 10, elDigits.length) == digits
                         })
                     })
-                    console.log(contact)
                     const image = contact?.image?.uri // contact?.image?.uri?contact.image?.uri:require('../assets/icon.png')
                     console.log(image)
                     return ({
                         id: number,
+                        // name: item.members[number]?.name,
                         imageUrl: image
                     })
                 })
 
+                console.log(`faces: ${JSON.stringify(faces)}`)
+
                 return (
                     <ListItem style={{ borderRadius: 20, marginVertical: 5 }} bottomDivider topDivider onPress={() => {
                         // navigation.closeDrawer()
-                        // navigation.navigate("Project", { title: item.title })
+                        navigation.navigate('Summary',{groupUid: item.groupID, faces})
                     }}
                         linearGradientProps={{
                             colors: ['#00ff0010', '#00ff0020'],
@@ -171,15 +213,15 @@ export default function GroupListScreen({ navigation }) {
                         ViewComponent={LinearGradient}
                         containerStyle={{ borderRadius: 20 }}
                     >
-                        {faces.length==1 && <Avatar size="medium" rounded title={title.substring(0, 2)} source={{uri:faces[0].imageUrl}}/>}
-                        {faces.length>1 && <View style={{marginRight:20}}><FacePile numFaces={3} faces={faces}/></View>}
+                        {faces.length == 1 && <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl }} />}
+                        {faces.length > 1 && <View style={{ marginRight: 20 }}><FacePile numFaces={2} faces={faces} /></View>}
                         <ListItem.Content>
                             <ListItem.Title style={styles.listItemTitle}>{title}</ListItem.Title>
                             {unusedMembers != 0 ?
                                 <ListItem.Subtitle style={styles.listItemSubtitle}>and {unusedMembers} more...</ListItem.Subtitle> :
                                 <ListItem.Subtitle style={styles.listItemSubtitle}>{item.transactionsLength} transactions so far!</ListItem.Subtitle>}
                         </ListItem.Content>
-                        <View style={[styles.textContainer, { backgroundColor: balance < 0 ? 'red' : 'green' }]}><Text>${Math.abs(balance)}</Text></View>
+                        <View style={[styles.textContainer, { backgroundColor: balance < 0 ? 'red' : 'green' }]}><Text>{displayMoney(balance)}</Text></View>
                         {/* <ListItem.Chevron /> */}
                     </ListItem>
                 )

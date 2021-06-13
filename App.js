@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, LogBox } from 'react-native';
+import { StyleSheet, Text, View, LogBox, Platform } from 'react-native';
 import LoginScreen from './screens/LoginScreen'
 import * as firebase from 'firebase'
 import GroupListScreen from './screens/GroupListScreen'
@@ -14,14 +14,14 @@ import { Icon } from 'react-native-elements'
 LogBox.ignoreLogs([""]);
 
 global.firebaseConfig = {
-  apiKey: "AIzaSyBSslkNH9yDudtoPRQsRk8zK1bDYiXj70E",
-  authDomain: "debtbalance-fe09f.firebaseapp.com",
-  projectId: "debtbalance-fe09f",
-  storageBucket: "debtbalance-fe09f.appspot.com",
-  messagingSenderId: "330777264179",
-  appId: "1:330777264179:web:b44fbdedabdfc8735a2346",
-  measurementId: "G-TQWBP7ETL1"
-};
+  apiKey: "AIzaSyDJjgKiG9ffxnbhOEfCHQgwmtFAMtlvpF8",
+  authDomain: "debt-balance.firebaseapp.com",
+  projectId: "debt-balance",
+  storageBucket: "debt-balance.appspot.com",
+  messagingSenderId: "135371147288",
+  appId: "1:135371147288:web:79ed47303c29cd37851b6d",
+  measurementId: "G-WDLNYZ77G5"
+}
 
 try {
   firebase.initializeApp(firebaseConfig);
@@ -44,7 +44,11 @@ export default function App() {
         console.log(",user is signed in")
         // User is signed in.
         const profileRef = db.collection("Users").doc(user.phoneNumber);
-        const profileSubscription = profileRef.onSnapshot((doc) => {
+        const profileSubscription = profileRef.onSnapshot({
+            // Listen for document metadata changes
+            includeMetadataChanges: true
+          },(doc) => {
+          console.log("profileSubscription fired")
           if(!doc.exists){
             console.log("No profile found")
             return setUserAccountSetUp(false)
@@ -63,7 +67,8 @@ export default function App() {
 
   console.log({signedIn,userAccountSetUp})
   const Stack = createStackNavigator();
-  // return (<GroupSummary/>)
+
+
   return (
     <NavigationContainer screenOptions={{headerShown:true}}>
         {!signedIn? (
@@ -73,15 +78,23 @@ export default function App() {
         ) : userAccountSetUp? (
           <Stack.Navigator screenOptions={{
             headerStyle: {
-              backgroundColor: 'green',
+              backgroundColor: 'green'
             },
             headerTitleStyle: {
               color:"white",
               fontWeight: 'bold',
             }
             }}>
-            <Stack.Screen name="Dashboard" component={GroupListScreen} options={ ({ navigation, route }) => ({headerShown: true, headerLeft:()=>(<Icon name='settings' type='feather' color='white' style={styles.leftHeaderIcon} onPress={()=>navigation.navigate('Settings')}/>)})}/>
-            <Stack.Screen name="Settings" component={Settings} options={{headerShown: false}}/>
+            <Stack.Screen name="Dashboard" component={GroupListScreen} options={ ({ navigation, route }) => ({headerShown: true, headerLeft:()=>(<Icon name='settings' type='feather' color='green' style={styles.leftHeaderIcon} onPress={()=>navigation.navigate('Settings')}/>), headerStyle:{ borderBottomColor: 'transparent',
+              shadowColor: 'transparent'},headerTitleStyle: {
+                color:"green",
+                fontWeight: 'bold',
+              }})}/>
+            <Stack.Screen name="Settings" component={Settings} options={{headerShown: true,headerTitle:'',headerStyle:{backgroundColor:"#50ff5060", borderBottomColor: 'transparent',
+              shadowColor: 'transparent'}}}/>
+            <Stack.Screen name="Summary" component={GroupSummary} options={{headerShown: true, headerStyle: {backgroundColor: '#00ff0090', borderBottomColor: 'transparent',
+              shadowColor: 'transparent',
+            },}}/>
           </Stack.Navigator>
         ):(
           <Stack.Navigator>

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
@@ -12,44 +12,52 @@ export default function Settings({ navigation }) {
     const db = firebase.firestore();
     const profileRef = db.collection("Users").doc(user.phoneNumber);
 
-    useEffect(()=>{
+    useEffect(() => {
         profileRef.onSnapshot((doc) => {
             setName(doc.data()?.name)
         })
-    },[true])
+    }, [true])
 
-    const submit = ()=>{
-        profileRef.set({name})
+    const submit = () => {
+        console.log('sumbit')
+        console.log({ 
+            name,
+            groups:[]
+        })
+        profileRef.set({ 
+            name,
+            groups:[]
+        })
     }
-    
-    return (<ImageBackground source={require("../assets/debt-balance-splash.png")} style={{flex: 1,resizeMode: "cover",justifyContent: "center"}}><KeyboardAvoidingView style={[styles.container]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <View style={[styles.textContainer,{marginBottom: 30,marginTop:30}]}><Text style={styles.titleText}>Set Up</Text></View>
-            {message.text && <View style={[styles.textContainer,{margin:10}]}><Text
-                style={{
-                    color: message.color || 'blue',
-                    fontSize: 17,
-                    textAlign: 'center',
-                    paddingTop:5
-                }}>
-                {message.text}
-            </Text></View>}
-            <View style={styles.textContainer}><Text style={styles.subtitleText}>We could not find an account connected to that number. Enter your name to create an account.</Text></View>
-            <TextInput
-                style={{ marginVertical: 10, fontSize: 17 }}
-                placeholder="Name"
-                style={styles.textInput}
-                onChangeText={(text)=>{
-                    console.log(text)
-                    setName(text)
-                }}
-                value={name}
-                onSubmitEditing={submit}
-                returnKeyType={"done"}
-            />
-            <TouchableOpacity style={[styles.confirmButtonContainer]} onPress={submit} >
-                <Text style={styles.confirmButtonText}>Create Account</Text>
-            </TouchableOpacity>
-        </KeyboardAvoidingView></ImageBackground>)
+
+    return (<ImageBackground source={require("../assets/debt-balance-splash.png")} style={{ flex: 1, resizeMode: "cover", justifyContent: "center" }} blurRadius={2}><KeyboardAvoidingView style={[styles.container]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <View style={[styles.textContainer, { marginBottom: 30, marginTop: 30 }]}><Text style={styles.titleText}>Set Up</Text></View>
+        {message.text && <View style={[styles.textContainer, { margin: 10 }]}><Text
+            style={{
+                color: message.color || 'blue',
+                fontSize: 17,
+                textAlign: 'center',
+                paddingTop: 5
+            }}>
+            {message.text}
+        </Text></View>}
+        <View style={styles.textContainer}><Text style={styles.subtitleText}>We could not find an account connected to that number. Enter your name to create an account.</Text></View>
+        <TextInput
+            style={{ marginVertical: 10, fontSize: 17 }}
+            placeholder="Name"
+            style={styles.textInput}
+            onChangeText={(text) => {
+                console.log(text)
+                setName(text)
+            }}
+            value={name}
+            onSubmitEditing={submit}
+            returnKeyType={"done"}
+        />
+        <TouchableOpacity style={[styles.confirmButtonContainer]} onPress={submit} >
+            <Text style={styles.confirmButtonText}>Create Account</Text>
+        </TouchableOpacity>
+    </KeyboardAvoidingView></ImageBackground>)
 }
 
 const styles = StyleSheet.create({
@@ -58,7 +66,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor:"transparent"
+        backgroundColor: "transparent"
     },
     textInput: {
         fontSize: 20,
@@ -67,30 +75,30 @@ const styles = StyleSheet.create({
         width: "90%",
         marginVertical: 10,
         padding: 10,
-        backgroundColor:"white",
+        backgroundColor: "white",
         // marginBottom:50
     },
     titleText: {
         fontSize: 70,
         //marginTop:20,
         // marginBottom: ,
-        fontWeight:"bold",
+        fontWeight: "bold",
         // textDecorationLine:"underline",
-        color:"white",
+        color: "white",
     },
-    textContainer:{
-        backgroundColor:"green",
-        paddingTop:0,
-        padding:10,
-        borderRadius:15,
-        marginHorizontal:20
+    textContainer: {
+        backgroundColor: "green",
+        paddingTop: 0,
+        padding: 10,
+        borderRadius: 15,
+        marginHorizontal: 20
     },
     subtitleText: {
         fontSize: 20,
         textAlign: 'center',
         // margin:30,
-        marginTop:5,
-        color:"white",
+        marginTop: 5,
+        color: "white",
     },
     confirmButtonContainer: {
         // marginTop: 50,
@@ -101,13 +109,13 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingHorizontal: 30,
         alignSelf: 'stretch',
-        marginHorizontal:50,
-        marginTop:30
+        marginHorizontal: 50,
+        marginTop: 30
     },
     confirmButtonText: {
         fontSize: 22,
         color: "white",
-        textAlign:"center"
+        textAlign: "center"
     },
     errorMessage: {
         color: "red"

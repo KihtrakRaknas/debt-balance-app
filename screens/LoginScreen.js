@@ -4,6 +4,7 @@ import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
+import displayMoney from '../helpers/displayMoney'
 
 export default function SignUpScreen({ navigation }) {
     const recaptchaVerifier = React.useRef(null);
@@ -17,7 +18,7 @@ export default function SignUpScreen({ navigation }) {
 
     let sendVerificationCode = async () => {
         console.log(validNumber)
-        if(!validNumber){
+        if (!validNumber) {
             Alert.alert("Invalid Phone Number!")
             return
         }
@@ -49,12 +50,12 @@ export default function SignUpScreen({ navigation }) {
                 db.collection("Users").doc(userCredential.user.phoneNumber).set({
                     groups: []
                 })
-                .then(() => {
-                    console.log("Document successfully written!");
-                })
-                .catch((error) => {
-                    console.error("Error writing document: ", error);
-                });
+                    .then(() => {
+                        console.log("Document successfully written!");
+                    })
+                    .catch((error) => {
+                        console.error("Error writing document: ", error);
+                    });
                 console.log("Sign in w/ phone success!")
             })
         } catch (err) {
@@ -62,24 +63,24 @@ export default function SignUpScreen({ navigation }) {
         }
     }
 
-    const fracOfNumberTyped = phoneNumber.length/10
-    const fracOfCodeTyped = verificationCode.length/6
+    const fracOfNumberTyped = phoneNumber.length / 10
+    const fracOfCodeTyped = verificationCode.length / 6
 
     //{backgroundImageUrl:},
-    return (<ImageBackground source={require("../assets/debt-balance-splash.png")} style={{flex: 1,resizeMode: "cover",justifyContent: "center"}}>
+    return (<ImageBackground source={require("../assets/debt-balance-splash.png")} style={{ flex: 1, resizeMode: "cover", justifyContent: "center" }} blurRadius={3}>
         <KeyboardAvoidingView style={[styles.container]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-            <View style={[styles.textContainer,{marginBottom: 30,marginTop:30}]}><Text style={styles.titleText}>Welcome</Text></View>
-            {message.text && <View style={[styles.textContainer,{margin:10}]}><Text
+            <View style={[styles.textContainer, { marginBottom: 30, marginTop: 30 }]}><Text style={styles.titleText}>Welcome</Text></View>
+            {message.text && <View style={[styles.textContainer, { margin: 10 }]}><Text
                 style={{
                     color: message.color || 'blue',
                     fontSize: 17,
                     textAlign: 'center',
-                    paddingTop:5
+                    paddingTop: 5
                 }}>
                 {message.text}
             </Text></View>}
             {!verificationId ? <>
-                <View style={[styles.textContainer,{marginBottom: 30}]}><Text style={[styles.subtitleText]}>Enter a phone number to sign in or sign up!</Text></View>
+                <View style={[styles.textContainer, { marginBottom: 30 }]}><Text style={[styles.subtitleText]}>Enter a phone number to sign in or sign up!</Text></View>
                 <PhoneInput
                     ref={phoneInput}
                     defaultValue={phoneNumber}
@@ -103,7 +104,7 @@ export default function SignUpScreen({ navigation }) {
                     firebaseConfig={global.firebaseConfig}
                     attemptInvisibleVerification={false} // Need to show banner if doing this
                 />
-                <LinearGradient colors={[validNumber?'blue':"#0000aa", 'grey']} style={[styles.confirmButtonContainer]} start={[0,0]} end={[1,1]} locations={[fracOfNumberTyped,fracOfNumberTyped]}>
+                <LinearGradient colors={[validNumber ? 'blue' : "#0000aa", 'grey']} style={[styles.confirmButtonContainer]} start={[0, 0]} end={[1, 1]} locations={[fracOfNumberTyped, fracOfNumberTyped]}>
                     <TouchableOpacity disabled={!validNumber} onPress={sendVerificationCode} >
                         <Text style={styles.confirmButtonText}>Send Verification Code</Text>
                     </TouchableOpacity>
@@ -114,17 +115,17 @@ export default function SignUpScreen({ navigation }) {
                     style={{ marginVertical: 10, fontSize: 17 }}
                     placeholder="Verification Code"
                     style={styles.textInput}
-                    onChangeText={(text)=>{
+                    onChangeText={(text) => {
                         console.log(text)
                         setVerificationCode(text)
                     }}
                     value={verificationCode}
-                    onSubmitEditing={(text)=>{
+                    onSubmitEditing={(text) => {
                         console.log(text)
                         confirmVerificationCode()
                     }}
                 />
-                <LinearGradient colors={['blue', 'grey']} style={[styles.confirmButtonContainer]} start={[0,0]} end={[1,1]} locations={[fracOfCodeTyped,fracOfCodeTyped]}>
+                <LinearGradient colors={['blue', 'grey']} style={[styles.confirmButtonContainer]} start={[0, 0]} end={[1, 1]} locations={[fracOfCodeTyped, fracOfCodeTyped]}>
                     <TouchableOpacity disabled={verificationCode.length != 6} onPress={confirmVerificationCode} >
                         <Text style={styles.confirmButtonText}>Verify</Text>
                     </TouchableOpacity>
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor:"transparent"
+        backgroundColor: "transparent"
     },
     textInput: {
         fontSize: 20,
@@ -149,29 +150,29 @@ const styles = StyleSheet.create({
         width: "90%",
         marginVertical: 10,
         padding: 10,
-        backgroundColor:"white"
+        backgroundColor: "white"
     },
     titleText: {
         fontSize: 70,
         //marginTop:20,
         // marginBottom: 0,
-        fontWeight:"bold",
+        fontWeight: "bold",
         // textDecorationLine:"underline",
-        color:"white",
+        color: "white",
     },
-    textContainer:{
-        backgroundColor:"green",
-        paddingTop:0,
-        padding:10,
-        borderRadius:15,
-        marginHorizontal:20,
+    textContainer: {
+        backgroundColor: "green",
+        paddingTop: 0,
+        padding: 10,
+        borderRadius: 15,
+        marginHorizontal: 20,
     },
     subtitleText: {
         fontSize: 20,
         textAlign: 'center',
         // margin:30,
-        marginTop:5,
-        color:"white",
+        marginTop: 5,
+        color: "white",
     },
     confirmButtonContainer: {
         marginTop: 50,
@@ -182,12 +183,12 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingHorizontal: 30,
         alignSelf: 'stretch',
-        marginHorizontal:50
+        marginHorizontal: 50
     },
     confirmButtonText: {
         fontSize: 22,
         color: "white",
-        textAlign:"center"
+        textAlign: "center"
     },
     errorMessage: {
         color: "red"
