@@ -210,10 +210,15 @@ export default function GroupSummary({ navigation, route }) {
             renderItem={({ item, index }) => {
                 return (
                     <ListItem bottomDivider={index!=membersToDisplay.length-1}>
-                        <ListItem.Content style={styles.listItem}>
-                            <ListItem.Title style={styles.listItemTitle}><Text style={{color:"blue"}}>{groupInfo?.members?.[item?.sender]?.name}</Text> 👉 {item?.recipients.map(number=>groupInfo?.members?.[number]?.name)?.join(", ")}</ListItem.Title>
+                    {
+                        item.active?<ListItem.Content style={styles.listItem}>
+                        <ListItem.Title style={styles.listItemTitle}><Text style={{color:"blue"}}>{groupInfo?.members?.[item?.sender]?.name}</Text> {item.isIOU?'👉':'👈'} {item?.recipients.map(number=>groupInfo?.members?.[number]?.name)?.join(", ")}</ListItem.Title>
+                        <ListItem.Subtitle style={styles.listItemSubtitle}>{item?.description}</ListItem.Subtitle>
+                        </ListItem.Content>:<ListItem.Content style={styles.listItem}>
+                            <ListItem.Title style={styles.listItemTitle}><Text style={{color:"red"}}>{groupInfo?.members?.[item?.sender]?.name}</Text> 👉 {item?.recipients.map(number=>groupInfo?.members?.[number]?.name)?.join(", ")+" (CANCELLED)"}</ListItem.Title>
                             <ListItem.Subtitle style={styles.listItemSubtitle}>{item?.description}</ListItem.Subtitle>
                         </ListItem.Content>
+                    }
                         <View style={{flexDirection:"column"}}>
                             <Badge
                                 status={"primary"}
@@ -228,7 +233,7 @@ export default function GroupSummary({ navigation, route }) {
                         </View>
                         <View style={{flexDirection:"column"}}>
                         {
-                            !item.isIOU && item.timestamp + 1000*60*60*24*5 > new Date().getTime()? <Icon
+                            item.active && !item.isIOU && item.timestamp + 1000*60*60*24*5 > new Date().getTime() && item.recipients.includes(firebase.auth().currentUser.phoneNumber)? <Icon
                             name='closecircle'
                             type='antdesign'
                             onPress={() =>{
@@ -236,11 +241,11 @@ export default function GroupSummary({ navigation, route }) {
                                     [{
                                         text: 'Decline',
                                         onPress: async () => {
-                                            groupInfo.transactions[index].active = false
-                                            console.log(`removing index: ${index}`)
+                                            groupInfo.transactions[groupInfo.transactions.length-1-index].active = false
                                             await groupRef.update({
                                                 transactions:groupInfo.transactions
                                             })
+                                            console.log(`removing index: ${index}`)
                                         },
                                         style: "destructive"
                                     }, { text: 'Cancel', style: 'cancel' },],
@@ -328,7 +333,7 @@ const styles = StyleSheet.create({
         margin:20,
     },
     listItem:{
-        paddingVertical:10
+        paddingVertical:10,
     },
     listItemTitle:{
         fontSize:25
