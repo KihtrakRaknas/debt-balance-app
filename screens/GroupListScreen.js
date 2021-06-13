@@ -82,7 +82,12 @@ export default function GroupListScreen({ navigation }) {
                 const listener = docRef.onSnapshot((doc) => {
                     if (doc.exists) {
                         const { members, transactions } = doc.data()
-                        setGroups((groups) => [...groups, { members, transactionsLength: transactions.length, groupID }].sort((a, b) => b?.transactionsLength - a?.transactionsLength))
+                        setGroups((groups) => {
+                            const indToDel = groups.findIndex(el=>el.groupID == groupID)
+                            if(indToDel != -1)
+                                groups = groups.splice(indToDel,1)
+                            return([...groups, { members, transactionsLength: transactions.length, groupID }].sort((a, b) => b?.transactionsLength - a?.transactionsLength))
+                        })
                     } else {
                         // doc.data() will be undefined in this case
                         console.log("No such document!");

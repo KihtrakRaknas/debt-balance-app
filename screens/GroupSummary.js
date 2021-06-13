@@ -33,26 +33,6 @@ export default function GroupSummary({ navigation, route }) {
         })
     }, [true]);
 
-    const checkValid = ()=>{
-        return true
-    }
-
-    const sendTransaction = ()=>{
-        let recipients = transactionRecipients
-        if(isIOU)
-            recipients=[transactionRecipient]
-        const transaction = {
-            description,
-            recipients,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            isIOU,
-            active:true,
-            sender: firebase.auth().currentUser.phoneNumber,
-            amount:Number(balanceText.substring(1))
-        }
-        groupRef.update({transactions:firebase.firestore.FieldValue.arrayUnion(transaction)})
-    }
-
     const balance = groupInfo?.members[firebase.auth().currentUser.phoneNumber]?.balance
     const oweMoney = balance<0
 
@@ -78,6 +58,40 @@ export default function GroupSummary({ navigation, route }) {
         memberDropDown.push({...member, number: memberUID})
     }
     memberDropDown = memberDropDown.map(el=>({label: `${el.name} (${el.number})`, value: el.number}))
+
+    const checkValid = ()=>{
+        let recipients = transactionRecipients
+        if(memberDropDown.length == 1)
+            recipients=[memberDropDown[0].value]
+        else if(isIOU)
+            recipients=[transactionRecipient]
+        if(recipients.length==0 || recipients[0]==null)
+            return false
+        if(!Number(balanceText.substring(1)) || Number(balanceText.substring(1))<=0)
+            return false
+        if(description.length>500)
+            return false
+        return true
+    }
+
+    const sendTransaction = ()=>{
+        let recipients = transactionRecipients
+        if(memberDropDown.length == 1)
+            recipients=[memberDropDown[0].value]
+        else if(isIOU)
+            recipients=[transactionRecipient]
+        const transaction = {
+            description,
+            recipients,
+            timestamp: new Date().getTime(),
+            isIOU,
+            active:true,
+            sender: firebase.auth().currentUser.phoneNumber,
+            amount:Number(balanceText.substring(1))
+        }
+        console.log(transaction)
+        groupRef.update({transactions:firebase.firestore.FieldValue.arrayUnion(transaction)}).then(()=>setNewTransactionVisible(false))
+    }
 
     return (<View style={styles.container}>
         <Modal
@@ -107,7 +121,7 @@ export default function GroupSummary({ navigation, route }) {
                             placeholder={isIOU?"Amount Owed 💸":'Amount Requested 💸'}
                             style={styles.textInput}
                             onChangeText={(text) => {
-                                var regex = /^\$[1-9]\d*(((,\d{3}){1})?(\.\d{0,2})?)$/;
+                                var regex = /^\$\d*(((,\d{3}){1})?(\.\d{0,2})?)$/;
                                 console.log(text)
                                 if (regex.test(text))
                                     onChangeBal(text)
@@ -164,7 +178,7 @@ export default function GroupSummary({ navigation, route }) {
             </View>
         </View>
         <View style={styles.peopleBox}>
-            <Text style={{textAlign:'center',padding:10}}>{oweMoney?`Maybe buy someone here a lunch?`:`Here are friends who owe you lunch 😉`}</Text>
+            {membersToDisplay.length>0 && <Text style={{textAlign:'center',padding:10}}>{oweMoney?`Maybe buy someone here a lunch?`:`Here are friends who owe you lunch 😉`}</Text>}
             <FlatList
                 horizontal={true}
                 data={membersToDisplay}
@@ -200,11 +214,18 @@ export default function GroupSummary({ navigation, route }) {
                             <ListItem.Title style={styles.listItemTitle}><Text style={{color:"blue"}}>{groupInfo?.members?.[item?.sender]?.name}</Text> 👉 {item?.recipients.map(number=>groupInfo?.members?.[number]?.name)?.join(", ")}</ListItem.Title>
                             <ListItem.Subtitle style={styles.listItemSubtitle}>{item?.description}</ListItem.Subtitle>
                         </ListItem.Content>
-                        <Badge
-                            status={"primary"}
-                            value={displayMoney(item?.amount)}
-                            containerStyle={{ marginTop: -20 }}
-                        />
+                        <View style={{}}>
+                            <Badge
+                                status={"primary"}
+                                value={displayMoney(item?.amount)}
+                                containerStyle={{ marginTop: -20 }}
+                            />
+                            <Badge
+                                status={"secondary"}
+                                value={new Date(item?.timestamp).toLocaleDateString()}
+                                containerStyle={{ marginBottom: -20 }}
+                            />
+                        </View>
                     </ListItem>
                 )
             }}
