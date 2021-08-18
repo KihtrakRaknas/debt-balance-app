@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, LogBox, Platform, Alert } from 'react-native';
+import {Button} from 'react-native-elements'
 import LoginScreen from './screens/LoginScreen'
 import * as firebase from 'firebase'
 import GroupListScreen from './screens/GroupListScreen'
@@ -14,6 +15,8 @@ import { Icon } from 'react-native-elements'
 import * as Notifications from 'expo-notifications';
 import { MainStackLoadedContext } from './helpers/contexts'
 import * as SplashScreen from 'expo-splash-screen';
+import FlashMessage from "react-native-flash-message";
+import { showMessage, hideMessage } from "react-native-flash-message";
 LogBox.ignoreLogs([""]);
 
 global.firebaseConfig = {
@@ -43,24 +46,42 @@ export default function App() {
     mainStackLoaded: () => {
       setTimeout(() => SplashScreen.hideAsync().catch(), 500)
       mainStackLoadedRef.current.loaded = true
+      console.log("loaded")
     },
     loaded: false,
     groupID: null
   });
   const db = firebase.firestore();
+  const navigatorRef = useRef();
 
   useLayoutEffect(() => {
     SplashScreen.preventAutoHideAsync();
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => { // Called when a notification is clicked
       const groupID = response.notification.request.content.data?.groupID
       console.log("res received")
       console.log(groupID);
-      mainStackLoadedRef.current.groupID = groupID
+      console.log(!mainStackLoadedRef.current.loaded)
+      console.log(!!navigatorRef.current)
+      if(!mainStackLoadedRef.current.loaded)
+        mainStackLoadedRef.current.groupID = groupID
+      else if(navigatorRef.current)
+        navigatorRef.current.navigate('Summary',{groupUid: groupID})
     });
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => { // Called when a notification is received while the app is open
       console.log(notification);
+      const {title, body, data} = notification.request.content
+      const groupID = data?.groupID
+      showMessage({
+        message: title,
+        description: body,
+        type: "info",
+        onPress: () => {
+          if(navigatorRef.current)
+            navigatorRef.current.navigate('Summary',{groupUid: groupID})
+        }
+      })
     });
 
     return () => {
@@ -110,17 +131,20 @@ export default function App() {
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
           </Stack.Navigator>
         ) : userAccountSetUp ? (
-          <Stack.Navigator screenOptions={{
-            headerStyle: {
-              backgroundColor: 'green'
-            },
-            headerTitleStyle: {
-              color: "white",
-              fontWeight: 'bold',
+          <Stack.Navigator screenOptions={({ navigation: nav }) => {
+            navigatorRef.current = nav
+            return {
+              headerStyle: {
+                backgroundColor: 'green'
+              },
+              headerTitleStyle: {
+                color: "white",
+                fontWeight: 'bold',
+              }
             }
           }}>
             <Stack.Screen name="Dashboard" component={GroupListScreen} options={({ navigation, route }) => ({
-              headerShown: true, headerLeft: () => (<Icon name='settings' type='feather' color='green' style={styles.leftHeaderIcon} onPress={() => navigation.navigate('Settings')} />), headerStyle: {
+              headerShown: true, headerLeft: () => (<Button icon={{name:'settings', type:'feather', color:'green'}} type="clear"/*style={styles.leftHeaderIcon}*/ onPress={() => navigation.navigate('Settings')} />), headerStyle: {
                 borderBottomColor: 'transparent',
                 shadowColor: 'transparent'
               }, headerTitleStyle: {
@@ -148,6 +172,7 @@ export default function App() {
         )}
         <StatusBar style="auto" />
       </MainStackLoadedContext.Provider>
+      <FlashMessage position="top" />
     </NavigationContainer>
   );
 }
@@ -161,5 +186,7 @@ const styles = StyleSheet.create({
   },
   leftHeaderIcon: {
     marginLeft: 10
+  },  rightHeaderIcon: {
+    paddingRight: 10
   }
 });

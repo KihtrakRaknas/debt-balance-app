@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import {ActivityIndicator, StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert, Dimensions, ImageBackground, Keyboard} from 'react-native';
-import { ListItem, Avatar, Badge, Icon } from 'react-native-elements';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import {ActivityIndicator, StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert, Dimensions, ImageBackground, Keyboard} from 'react-native';
+import { ListItem, Avatar, Badge, Icon, Button } from 'react-native-elements';
 // import { ChatItem } from 'react-chat-elements'
 import * as firebase from 'firebase';
 import { FAB } from 'react-native-paper';
@@ -16,6 +16,7 @@ import displayMoney from '../helpers/displayMoney'
 export default function GroupSummary({ navigation, route }) {
     const [balanceText, onChangeBal] = useState('$');
     const { groupUid, faces } = route.params
+    const [facesState, setFacesState] = useState(faces)
     const [newTransactionVisible, setNewTransactionVisible] = useState(false)
     const db = firebase.firestore();
     const user = firebase.auth().currentUser
@@ -26,8 +27,48 @@ export default function GroupSummary({ navigation, route }) {
     const [transactionRecipients, setTransactionRecipients] = useState([]);
     const [transactionRecipient, setTransactionRecipient] = useState();
     const [description, setDescription] = useState('');
+    const [contacts, setContacts] = React.useState([])
 
-    React.useEffect(() => {
+    const nameOfNumberInContacts = Platform.OS == "ios" ? "digits" : "number"
+
+    useEffect(() => {
+        (async () => {
+
+            const { status } = await Contacts.requestPermissionsAsync();
+            if (status === 'granted') {
+                const { data } = await Contacts.getContactsAsync({
+                    fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Image, Contacts.Fields.Name],
+                });
+                if (data.length > 0) {
+                    setContacts(data)
+                    let array = []
+                    let promises=[]
+                    let seen = []
+                    data.forEach((contact, ind) => {
+                        if(contact.phoneNumbers){
+                            for(let phoneNumberIndex in contact.phoneNumbers){
+                                let number=cleanNumber(contact.phoneNumbers[phoneNumberIndex][nameOfNumberInContacts])
+                                if(number==firebase.auth().currentUser.phoneNumber)
+                                    continue;
+                                promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
+                                    if(text == "true"&&!seen.includes(number)){
+                                        console.log("Exists "+number)
+                                        array.push(contact)
+                                        seen.push(number)
+                                    }
+                                }))                  
+                            }
+                        }
+                    })
+                    Promise.all(promises).then(()=>{
+                        setContacts(array)
+                    })
+                }
+            }
+        })();
+    }, [true])
+
+    useEffect(() => {
         return groupRef.onSnapshot((doc) => {
             setGroupInfo(doc.data())
         })
@@ -36,19 +77,70 @@ export default function GroupSummary({ navigation, route }) {
     const balance = groupInfo?.members[firebase.auth().currentUser.phoneNumber]?.balance
     const oweMoney = balance<0
 
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         navigation.setOptions({
-            headerStyle: {backgroundColor: isNaN(balance)?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',}
+            headerStyle: {backgroundColor: isNaN(balance)?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',},
+            headerRight: () => (<Button icon={{name:'trash', type:'font-awesome-5', color:'white'}} type="clear"/*style={styles.leftHeaderIcon}*/ onPress={() => {
+                let canDelete = !!groupInfo?.members
+                for(let memberUID in groupInfo.members)
+                    if(groupInfo.members[memberUID].balance != 0)
+                        canDelete = false
+
+                if(!canDelete)
+                    Alert.alert('Cannot Delete Group', 'You cannot delete a group where someone has a non-zero balance')
+                else
+                    Alert.alert(`Delete this group?`, `Are you sure you want to delete this group for everyone?`,
+                        [{
+                            text: 'Delete',
+                            onPress: async () => {
+                                groupRef.delete().then(()=>navigation.goBack()).catch((error) => {
+                                    Alert.alert("Something went wrong when deleting this group")
+                                });
+                            },
+                            style: "destructive"
+                        }, { text: 'Cancel', style: 'cancel' },],
+                        { cancelable: true }
+                    );
+            }} />)
         });
-    }, [balance,navigation]);
+    }, [balance,navigation, groupInfo]);
 
     let membersToDisplay = []
     for(let memberUID in groupInfo?.members){
         const member = groupInfo?.members?.[memberUID]
         if(oweMoney?member.balance>0:member.balance<0)
-            membersToDisplay.push({...member, number: memberUID})
+        membersToDisplay.push({...member, number: memberUID})
     }
     membersToDisplay.sort((a,b)=>{Math.abs(a.balance)-Math.abs(b.balance)})
+    console.log("templen",membersToDisplay.length)
+
+    useEffect(() => {
+        if(/*facesRef.current ||*/ !groupInfo)
+            return;
+        console.log("populating facesState")
+        console.log(groupInfo?.members.length)
+        const memberUIDs = Object.keys(groupInfo?.members).sort();
+        let facesTemp = memberUIDs.filter(el=>el!=firebase.auth().currentUser.phoneNumber).map(number => {
+            const digits = number.substring(number.length - 10, number.length)
+            const contact = contacts.find(el => {
+                if (!el)
+                    return false
+                return el?.phoneNumbers?.some(el => {
+                    const elDigits = "" + el?.[nameOfNumberInContacts]
+                    return elDigits.substring(elDigits.length - 10, elDigits.length) == digits
+                })
+            })
+            const image = contact?.image?.uri // contact?.image?.uri?contact.image?.uri:require('../assets/icon.png')
+            // console.log(image)
+            return ({
+                id: number,
+                // name: item.members[number]?.name,
+                imageUrl: image
+            })
+        })
+        console.log(facesTemp)
+        setFacesState(facesTemp)
+    }, [groupInfo?.members, contacts]);
 
     let memberDropDown = []
     for(let memberUID in groupInfo?.members){
@@ -184,7 +276,7 @@ export default function GroupSummary({ navigation, route }) {
                 data={membersToDisplay}
                 keyExtractor={(el, index)=>""+index}
                 renderItem={({ item, index }) => {
-                    let image = faces.find(el=>el.id == item?.number)?.imageUrl
+                    let image = facesState?.find(el=>el.id == item?.number)?.imageUrl
                     if(!image)
                         image = 'err'
                     const {name, balance} = item

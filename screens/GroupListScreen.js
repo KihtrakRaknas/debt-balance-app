@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useLayoutEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, FlatList, Image, Modal, Alert, Platform } from 'react-native';
-import { ListItem, Avatar, Badge } from 'react-native-elements';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert, Platform } from 'react-native';
+import { ListItem, Avatar, Badge, Button } from 'react-native-elements';
 import * as firebase from 'firebase';
 import { FAB } from 'react-native-paper';
 import CustomMultiPicker from "react-native-multiple-select-list";
@@ -31,7 +31,8 @@ export default function GroupListScreen({ navigation }) {
 
     useLayoutEffect(()=>{
         mainStackLoadedRef.current.mainStackLoaded()
-        // navigation.navigate('Summary',{groupUid: mainStackLoadedRef.current.groupID})
+        if(mainStackLoadedRef.current.groupID)
+            navigation.navigate('Summary',{groupUid: mainStackLoadedRef.current.groupID})
     }, [true])
 
 
@@ -46,7 +47,7 @@ export default function GroupListScreen({ navigation }) {
               finalStatus = status;
             }
             if (finalStatus !== 'granted') {
-              alert('Failed to get push token for push notification!');
+            //   alert('Failed to get push token for push notification!');
               return;
             }
             console.log("got notif perms")
@@ -89,7 +90,9 @@ export default function GroupListScreen({ navigation }) {
                                 promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
                                     if(text == "true"&&!seen.includes(number)){
                                         console.log("Exists "+number)
-                                        array.push(contact)
+                                        console.log(contact)
+                                        console.log({...contact, phoneNumbers:[contact.phoneNumbers[phoneNumberIndex]] })
+                                        array.push({...contact, phoneNumbers:[contact.phoneNumbers[phoneNumberIndex]] })
                                         seen.push(number)
                                     }
                                 }))                  
@@ -167,14 +170,15 @@ export default function GroupListScreen({ navigation }) {
                         placeholderTextColor={'#757575'}
                         returnValue={"label"} // label or value
                         callback={(res) => {
-                            setMembers([])
+                            let membersTemp = []
                             res.forEach(name=>{
                                 let contact=contacts.find(el=>el.name==name)
                                 if(contact&&contact.phoneNumbers){
-                                    setMembers([...membersToAdd, cleanNumber(contact.phoneNumbers[0][nameOfNumberInContacts])])
+                                    membersTemp.push(cleanNumber(contact.phoneNumbers[0][nameOfNumberInContacts]))
                                 }
                             })
-                            console.log("members"+membersToAdd)
+                            setMembers(membersTemp)
+                            console.log("members"+membersTemp)
                         }} // callback, array of selected items
                         rowBackgroundColor={"#eee"}
                         rowRadius={5}
@@ -185,6 +189,7 @@ export default function GroupListScreen({ navigation }) {
                         iconSize={30}
                         selectedIconName={"ios-checkmark-circle-outline"}
                         unselectedIconName={"ios-radio-button-off-outline"}
+                        scrollViewHeight={"80%"}
                     />
                     <Button
                         onPress={()=>{
@@ -195,7 +200,13 @@ export default function GroupListScreen({ navigation }) {
                                     headers: { 'Content-Type': 'application/json' },
                                 })
                                 .then(res => res.json())
-                                .then(json => setAdd(false));
+                                .then(json => {
+                                    console.log(json)
+                                    if(json?.error)
+                                        Alert.alert(json?.error,null,[{ text: "OK", onPress: () => setAdd(false) }])
+                                    else
+                                    setAdd(false)
+                                });
                         }}
                         title="Create Group"
                         color="#841584"
@@ -219,7 +230,7 @@ export default function GroupListScreen({ navigation }) {
                     if (title.length + name.length > 30)
                         break;
                     title += name + ', '
-                    lastIndexUsed = index
+                    lastIndexUsed++
                 }
                 title = title.substring(0, title.length - 2)
                 const unusedMembers = (memberUIDs.length - 1) - lastIndexUsed
@@ -237,7 +248,7 @@ export default function GroupListScreen({ navigation }) {
                         })
                     })
                     const image = contact?.image?.uri // contact?.image?.uri?contact.image?.uri:require('../assets/icon.png')
-                    console.log(image)
+                    // console.log(image)
                     return ({
                         id: number,
                         // name: item.members[number]?.name,
@@ -245,7 +256,7 @@ export default function GroupListScreen({ navigation }) {
                     })
                 })
 
-                console.log(`faces: ${JSON.stringify(faces)}`)
+                // console.log(`faces: ${JSON.stringify(faces)}`)
 
                 return (
                     <ListItem style={{ borderRadius: 20, marginVertical: 5 }} bottomDivider topDivider onPress={() => {
@@ -253,14 +264,14 @@ export default function GroupListScreen({ navigation }) {
                         navigation.navigate('Summary',{groupUid: item.groupID, faces})
                     }}
                         linearGradientProps={{
-                            colors: ['#00ff0010', '#00ff0020'],
-                            start: { x: 0, y: 0 },
-                            end: { x: 1, y: 0 },
+                            colors: ['#00ff0010', '#00ff0040'],
+                            start: { x: .1, y: 0 },
+                            end: { x: .9, y: 0 },
                         }}
                         ViewComponent={LinearGradient}
                         containerStyle={{ borderRadius: 20 }}
                     >
-                        {faces.length == 1 && <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl }} />}
+                        {faces.length == 1 && <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl?faces[0].imageUrl:"a" }} />}
                         {faces.length > 1 && <View style={{ marginRight: 20 }}><FacePile numFaces={2} faces={faces} /></View>}
                         <ListItem.Content>
                             <ListItem.Title style={styles.listItemTitle}>{title}</ListItem.Title>

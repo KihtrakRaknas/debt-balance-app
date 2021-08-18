@@ -45,7 +45,19 @@ export default function Settings({ navigation }) {
             returnKeyType={"done"}
         />
         <View style={{ width: '95%', height: 3, backgroundColor: 'grey', borderRadius: 10 }}></View>
-        <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={() => firebase.auth().signOut()} >
+        <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={async () => {
+            try{
+                const token = (await Notifications.getExpoPushTokenAsync()).data;
+                db.collection('Users').doc(firebase.auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayRemove(token) }).then(() => {
+                    firebase.auth().signOut()
+                }).catch((error) => {
+                    Alert.alert("Sign out failed. Try again when you have a better internet connection")
+                })
+            }catch(e){
+
+            }
+            
+        }} >
             <Text style={styles.confirmButtonText}>Sign Out</Text>
         </TouchableOpacity>
     </KeyboardAvoidingView></LinearGradient>)
