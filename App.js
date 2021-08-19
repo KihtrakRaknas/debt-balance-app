@@ -115,6 +115,7 @@ export default function App() {
           }
         });
       } else {
+        setTimeout(() => SplashScreen.hideAsync().catch(), 500)
         // No user is signed in.
       }
     });

@@ -4,6 +4,7 @@ import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Notifications from 'expo-notifications';
 
 export default function Settings({ navigation }) {
     const [message, setMessage] = React.useState('');
@@ -46,6 +47,7 @@ export default function Settings({ navigation }) {
         />
         <View style={{ width: '95%', height: 3, backgroundColor: 'grey', borderRadius: 10 }}></View>
         <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={async () => {
+            console.log("Sign out")
             try{
                 const token = (await Notifications.getExpoPushTokenAsync()).data;
                 db.collection('Users').doc(firebase.auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayRemove(token) }).then(() => {
@@ -54,7 +56,7 @@ export default function Settings({ navigation }) {
                     Alert.alert("Sign out failed. Try again when you have a better internet connection")
                 })
             }catch(e){
-
+                console.log(e)
             }
             
         }} >
