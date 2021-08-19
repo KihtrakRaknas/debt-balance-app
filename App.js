@@ -103,6 +103,7 @@ export default function App() {
           includeMetadataChanges: true
         }, (doc) => {
           console.log("profileSubscription fired")
+          setTimeout(() => SplashScreen.hideAsync().catch(), 500)
           if (!doc.exists) {
             console.log("No profile found")
             return setUserAccountSetUp(false)

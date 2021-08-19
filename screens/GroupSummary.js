@@ -286,6 +286,7 @@ export default function GroupSummary({ navigation, route }) {
                             <Badge
                                 status={oweMoney?"success":"error"}
                                 value={displayMoney(balance)}
+                                // value={<Text style={{fontSize:12, color:"white",padding:3}} adjustsFontSizeToFit numberOfLines={1}>{displayMoney(balance)}</Text>}
                                 containerStyle={{ position: 'absolute', top: 0, right: 0 }}
                             />
                             <Text>{name}</Text>   
