@@ -79,7 +79,7 @@ export default function GroupSummary({ navigation, route }) {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerStyle: {backgroundColor: isNaN(balance)?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',},
+            headerStyle: {backgroundColor: !balance?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',},
             headerRight: () => (<Button icon={{name:'trash', type:'font-awesome-5', color:'white'}} type="clear"/*style={styles.leftHeaderIcon}*/ onPress={() => {
                 let canDelete = !!groupInfo?.members
                 for(let memberUID in groupInfo.members)
@@ -138,7 +138,7 @@ export default function GroupSummary({ navigation, route }) {
                 imageUrl: image
             })
         })
-        console.log(facesTemp)
+        // console.log(facesTemp)
         setFacesState(facesTemp)
     }, [groupInfo?.members, contacts]);
 
@@ -264,8 +264,8 @@ export default function GroupSummary({ navigation, route }) {
 
         <View style={styles.containerStyle} >
             <View style={styles.sliderContainerStyle} >
-                <ImageBackground style={styles.slider} source={isNaN(displayMoney(balance).substring(1))?null:oweMoney?require("../assets/debt-balance-splash-red.png"):require("../assets/debt-balance-splash.png")} blurRadius={6}>
-                    <Text style={styles.largeText} adjustsFontSizeToFit>{isNaN(displayMoney(balance).substring(1))? <ActivityIndicator size="large" color="#00ff00" />:displayMoney(balance)}</Text>
+                <ImageBackground style={styles.slider} source={!displayMoney(balance).substring(1)?null:oweMoney?require("../assets/debt-balance-splash-red.png"):require("../assets/debt-balance-splash.png")} blurRadius={6}>
+                    <Text style={styles.largeText} adjustsFontSizeToFit numberOfLines={1}>{!displayMoney(balance).substring(1)? <ActivityIndicator size="large" color="#00ff00" />:displayMoney(balance)}</Text>
                 </ImageBackground>
             </View>
         </View>
@@ -407,7 +407,8 @@ const styles = StyleSheet.create({
     },
     largeText:{
         fontSize:90,
-        color:"white"
+        color:"white",
+        paddingHorizontal:10
     },
     peopleBox:{
         backgroundColor:"white",

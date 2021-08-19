@@ -90,8 +90,8 @@ export default function GroupListScreen({ navigation }) {
                                 promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
                                     if(text == "true"&&!seen.includes(number)){
                                         console.log("Exists "+number)
-                                        console.log(contact)
-                                        console.log({...contact, phoneNumbers:[contact.phoneNumbers[phoneNumberIndex]] })
+                                        // console.log(contact)
+                                        // console.log({...contact, phoneNumbers:[contact.phoneNumbers[phoneNumberIndex]] })
                                         array.push({...contact, phoneNumbers:[contact.phoneNumbers[phoneNumberIndex]] })
                                         seen.push(number)
                                     }
