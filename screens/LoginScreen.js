@@ -1,13 +1,13 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
+// import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
 import displayMoney from '../helpers/displayMoney'
 
 export default function SignUpScreen({ navigation }) {
-    const recaptchaVerifier = React.useRef(null);
+    // const recaptchaVerifier = React.useRef(null);
     const phoneInput = React.useRef(null);
     const [phoneNumber, setPhoneNumber] = React.useState("");
     const [formattedPhoneNumber, setFormattedPhoneNumber] = React.useState("");
@@ -26,15 +26,20 @@ export default function SignUpScreen({ navigation }) {
         // FirebaseAuthApplicationVerifier interface and can be
         // passed directly to `verifyPhoneNumber`.
         try {
+            console.log("verificationIdStart")
+            console.log(formattedPhoneNumber)
             const verificationId = await auth().verifyPhoneNumber(
-                formattedPhoneNumber,
-                recaptchaVerifier.current
+                formattedPhoneNumber
+                // recaptchaVerifier.current
             );
+            console.log("verificationId")
+            console.log(verificationId)
             setVerificationId(verificationId);
             setMessage({
                 text: null,
             });
         } catch (err) {
+            console.log("err",err)
             setMessage({ text: `Error: ${err.message}`, color: 'red' });
         }
     }
@@ -42,10 +47,11 @@ export default function SignUpScreen({ navigation }) {
     let confirmVerificationCode = async () => {
         try {
             const credential = auth.PhoneAuthProvider.credential(
-                verificationId,
+                verificationId.verificationId,
                 verificationCode
             );
-            await auth().signInWithCredential(credential).then((userCredential) => {
+            // await auth().signInWithCredential(credential).then((userCredential) => {
+            auth().currentUser.linkWithCredential(credential).then((userCredential) => {
                 db.collection("Users").doc(userCredential.user.phoneNumber).set({
                     groups: []
                 })
@@ -98,11 +104,11 @@ export default function SignUpScreen({ navigation }) {
                     withShadow
                     autoFocus={false}
                 />
-                <FirebaseRecaptchaVerifierModal
+                {/* <FirebaseRecaptchaVerifierModal
                     ref={recaptchaVerifier}
                     firebaseConfig={global.firebaseConfig}
                     attemptInvisibleVerification={false} // Need to show banner if doing this
-                />
+                /> */}
                 <LinearGradient colors={[validNumber ? 'blue' : "#0000aa", 'grey']} style={[styles.confirmButtonContainer]} start={[0, 0]} end={[1, 1]} locations={[fracOfNumberTyped, fracOfNumberTyped]}>
                     <TouchableOpacity disabled={!validNumber} onPress={sendVerificationCode} >
                         <Text style={styles.confirmButtonText}>Send Verification Code</Text>
