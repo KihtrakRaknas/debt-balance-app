@@ -26,7 +26,7 @@ export default function SignUpScreen({ navigation }) {
         // FirebaseAuthApplicationVerifier interface and can be
         // passed directly to `verifyPhoneNumber`.
         try {
-            const phoneProvider = new auth.PhoneAuthProvider();
+            const phoneProvider = new auth.PhoneAuthProvider;
             const verificationId = await phoneProvider.verifyPhoneNumber(
                 formattedPhoneNumber,
                 recaptchaVerifier.current
