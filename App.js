@@ -3,7 +3,9 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, LogBox, Platform, Alert } from 'react-native';
 import {Button} from 'react-native-elements'
 import LoginScreen from './screens/LoginScreen'
-import * as firebase from 'firebase'
+import firebase from '@react-native-firebase/app';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import GroupListScreen from './screens/GroupListScreen'
 import SetUpScreen from './screens/SetUpScreen'
 import Settings from './screens/Settings'
@@ -51,7 +53,7 @@ export default function App() {
     loaded: false,
     groupID: null
   });
-  const db = firebase.firestore();
+  const db = firestore();
   const navigatorRef = useRef();
 
   useLayoutEffect(() => {
@@ -92,7 +94,7 @@ export default function App() {
 
   useEffect(() => {
     //Check if user is singed in
-    firebase.auth().onAuthStateChanged((user) => {
+    auth().onAuthStateChanged((user) => {
       setSignedIn(!!user)
       if (user) {
         console.log(",user is signed in")
