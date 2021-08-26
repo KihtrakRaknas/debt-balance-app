@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
 import * as firebase from 'firebase';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
 import displayMoney from '../helpers/displayMoney'
+import { Button } from 'react-native-elements';
 
 export default function SignUpScreen({ navigation }) {
     const recaptchaVerifier = React.useRef(null);
@@ -130,6 +131,7 @@ export default function SignUpScreen({ navigation }) {
                         <Text style={styles.confirmButtonText}>Verify</Text>
                     </TouchableOpacity>
                 </LinearGradient>
+                <Button title="Back" onPress={() => setVerificationId(null)} type="solid" />
             </>}
         </KeyboardAvoidingView>
     </ImageBackground>)

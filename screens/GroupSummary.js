@@ -79,7 +79,7 @@ export default function GroupSummary({ navigation, route }) {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerStyle: {backgroundColor: !balance?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',},
+            headerStyle: {backgroundColor: balance == null?'#ffffff':oweMoney?'#d40000':'#007000', borderBottomColor: 'transparent', shadowColor: 'transparent',},
             headerRight: () => (<Button icon={{name:'trash', type:'font-awesome-5', color:'white'}} type="clear"/*style={styles.leftHeaderIcon}*/ onPress={() => {
                 let canDelete = !!groupInfo?.members
                 for(let memberUID in groupInfo.members)
