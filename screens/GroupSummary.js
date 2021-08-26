@@ -2,7 +2,8 @@ import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
 import {ActivityIndicator, StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert, Dimensions, ImageBackground, Keyboard} from 'react-native';
 import { ListItem, Avatar, Badge, Icon, Button } from 'react-native-elements';
 // import { ChatItem } from 'react-chat-elements'
-import * as firebase from 'firebase';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import { FAB } from 'react-native-paper';
 import CustomMultiPicker from "react-native-multiple-select-list";
 import * as Contacts from 'expo-contacts';
@@ -18,8 +19,8 @@ export default function GroupSummary({ navigation, route }) {
     const { groupUid, faces } = route.params
     const [facesState, setFacesState] = useState(faces)
     const [newTransactionVisible, setNewTransactionVisible] = useState(false)
-    const db = firebase.firestore();
-    const user = firebase.auth().currentUser
+    const db = firestore();
+    const user = auth().currentUser
     const groupRef = db.collection("Groups").doc(groupUid);
     const [groupInfo, setGroupInfo] = useState();
     const [isIOU, setIsIOU] = useState(true);
@@ -48,7 +49,7 @@ export default function GroupSummary({ navigation, route }) {
                         if(contact.phoneNumbers){
                             for(let phoneNumberIndex in contact.phoneNumbers){
                                 let number=cleanNumber(contact.phoneNumbers[phoneNumberIndex][nameOfNumberInContacts])
-                                if(number==firebase.auth().currentUser.phoneNumber)
+                                if(number==auth().currentUser.phoneNumber)
                                     continue;
                                 promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
                                     if(text == "true"&&!seen.includes(number)){
@@ -74,7 +75,7 @@ export default function GroupSummary({ navigation, route }) {
         })
     }, [true]);
 
-    const balance = groupInfo?.members[firebase.auth().currentUser.phoneNumber]?.balance
+    const balance = groupInfo?.members[auth().currentUser.phoneNumber]?.balance
     const oweMoney = balance<0
 
     useLayoutEffect(() => {
@@ -120,7 +121,7 @@ export default function GroupSummary({ navigation, route }) {
         console.log("populating facesState")
         console.log(groupInfo?.members.length)
         const memberUIDs = Object.keys(groupInfo?.members).sort();
-        let facesTemp = memberUIDs.filter(el=>el!=firebase.auth().currentUser.phoneNumber).map(number => {
+        let facesTemp = memberUIDs.filter(el=>el!=auth().currentUser.phoneNumber).map(number => {
             const digits = number.substring(number.length - 10, number.length)
             const contact = contacts.find(el => {
                 if (!el)
@@ -144,7 +145,7 @@ export default function GroupSummary({ navigation, route }) {
 
     let memberDropDown = []
     for(let memberUID in groupInfo?.members){
-        if(memberUID==firebase.auth().currentUser.phoneNumber)
+        if(memberUID==auth().currentUser.phoneNumber)
             continue;
         const member = groupInfo?.members?.[memberUID]
         memberDropDown.push({...member, number: memberUID})
@@ -178,7 +179,7 @@ export default function GroupSummary({ navigation, route }) {
             timestamp: new Date().getTime(),
             isIOU,
             active:true,
-            sender: firebase.auth().currentUser.phoneNumber,
+            sender: auth().currentUser.phoneNumber,
             amount:Number(balanceText.substring(1))
         }
         console.log(transaction)
@@ -326,7 +327,7 @@ export default function GroupSummary({ navigation, route }) {
                         </View>
                         <View style={{flexDirection:"column"}}>
                         {
-                            item.active && !item.isIOU && item.timestamp + 1000*60*60*24*5 > new Date().getTime() && item.recipients.includes(firebase.auth().currentUser.phoneNumber)? <Icon
+                            item.active && !item.isIOU && item.timestamp + 1000*60*60*24*5 > new Date().getTime() && item.recipients.includes(auth().currentUser.phoneNumber)? <Icon
                             name='closecircle'
                             type='antdesign'
                             onPress={() =>{

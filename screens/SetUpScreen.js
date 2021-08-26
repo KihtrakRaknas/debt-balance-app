@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
-import * as firebase from 'firebase';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,8 +9,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function Settings({ navigation }) {
     const [message, setMessage] = React.useState('');
     const [name, setName] = React.useState('');
-    const user = firebase.auth().currentUser
-    const db = firebase.firestore();
+    const user = auth().currentUser
+    const db = firestore();
     const profileRef = db.collection("Users").doc(user.phoneNumber);
 
     useEffect(() => {

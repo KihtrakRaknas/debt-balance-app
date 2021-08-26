@@ -1,7 +1,8 @@
 import React, { useEffect, useContext, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert, Platform } from 'react-native';
 import { ListItem, Avatar, Badge, Button } from 'react-native-elements';
-import * as firebase from 'firebase';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import { FAB } from 'react-native-paper';
 import CustomMultiPicker from "react-native-multiple-select-list";
 import * as Contacts from 'expo-contacts';
@@ -18,7 +19,7 @@ export default function GroupListScreen({ navigation }) {
     const [contacts, setContacts] = React.useState([])
     const [membersToAdd, setMembers] = React.useState([])
     const mainStackLoadedRef = useContext(MainStackLoadedContext)
-    const db = firebase.firestore();
+    const db = firestore();
     const countryTelData = require('country-telephone-data')
 
     const nameOfNumberInContacts = Platform.OS == "ios" ? "digits" : "number"
@@ -53,7 +54,7 @@ export default function GroupListScreen({ navigation }) {
             console.log("got notif perms")
             const token = (await Notifications.getExpoPushTokenAsync()).data;
             console.log("token ",token);
-            db.collection('Users').doc(firebase.auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayUnion(token) });
+            db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayUnion(token) });
           } else {
             alert('Must use physical device for Push Notifications');
           }
@@ -85,7 +86,7 @@ export default function GroupListScreen({ navigation }) {
                         if(contact.phoneNumbers){
                             for(let phoneNumberIndex in contact.phoneNumbers){
                                 let number=cleanNumber(contact.phoneNumbers[phoneNumberIndex][nameOfNumberInContacts])
-                                if(number==firebase.auth().currentUser.phoneNumber)
+                                if(number==auth().currentUser.phoneNumber)
                                     continue;
                                 promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
                                     if(text == "true"&&!seen.includes(number)){
@@ -117,7 +118,7 @@ export default function GroupListScreen({ navigation }) {
         //     setContacts([...contacts, el.firstName])
         // })
 
-        const user = firebase.auth().currentUser
+        const user = auth().currentUser
         const profileRef = db.collection("Users").doc(user.phoneNumber);
         let listeners = []
         const profileListener = profileRef.onSnapshot((doc) => {
@@ -193,7 +194,7 @@ export default function GroupListScreen({ navigation }) {
                     />
                     <Button
                         onPress={()=>{
-                            const body = { numbers: [...membersToAdd,firebase.auth().currentUser.phoneNumber] };
+                            const body = { numbers: [...membersToAdd,auth().currentUser.phoneNumber] };
                             fetch('https://makegroup.herokuapp.com/', {
                                     method: 'post',
                                     body:    JSON.stringify(body),
@@ -224,7 +225,7 @@ export default function GroupListScreen({ navigation }) {
                 let lastIndexUsed = 0
                 for (let index in memberUIDs) {
                     const member = memberUIDs[index]
-                    if(member == firebase.auth().currentUser.phoneNumber)
+                    if(member == auth().currentUser.phoneNumber)
                         continue;
                     const name = item.members[member]?.name
                     if (title.length + name.length > 30)
@@ -235,9 +236,9 @@ export default function GroupListScreen({ navigation }) {
                 title = title.substring(0, title.length - 2)
                 const unusedMembers = (memberUIDs.length - 1) - lastIndexUsed
 
-                const balance = item.members[firebase.auth().currentUser.phoneNumber]?.balance
+                const balance = item.members[auth().currentUser.phoneNumber]?.balance
 
-                const faces = memberUIDs.filter(el=>el!=firebase.auth().currentUser.phoneNumber).map(number => {
+                const faces = memberUIDs.filter(el=>el!=auth().currentUser.phoneNumber).map(number => {
                     const digits = number.substring(number.length - 10, number.length)
                     const contact = contacts.find(el => {
                         if (!el)

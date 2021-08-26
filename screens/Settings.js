@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
 import * as firebase from 'firebase';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,8 +11,8 @@ import * as Notifications from 'expo-notifications';
 export default function Settings({ navigation }) {
     const [message, setMessage] = React.useState('');
     const [name, setName] = React.useState('');
-    const user = firebase.auth().currentUser
-    const db = firebase.firestore();
+    const user = auth().currentUser
+    const db = firestore();
     const profileRef = db.collection("Users").doc(user.phoneNumber);
 
     useEffect(() => {
@@ -50,8 +52,8 @@ export default function Settings({ navigation }) {
             console.log("Sign out")
             try{
                 const token = (await Notifications.getExpoPushTokenAsync()).data;
-                db.collection('Users').doc(firebase.auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayRemove(token) }).then(() => {
-                    firebase.auth().signOut()
+                db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firestore.FieldValue.arrayRemove(token) }).then(() => {
+                    auth().signOut()
                 }).catch((error) => {
                     Alert.alert("Sign out failed. Try again when you have a better internet connection")
                 })

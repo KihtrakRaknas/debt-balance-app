@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
-import * as firebase from 'firebase';
+import auth from '@react-native-firebase/auth';
 import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,7 +26,7 @@ export default function SignUpScreen({ navigation }) {
         // FirebaseAuthApplicationVerifier interface and can be
         // passed directly to `verifyPhoneNumber`.
         try {
-            const phoneProvider = new firebase.auth.PhoneAuthProvider();
+            const phoneProvider = new auth.PhoneAuthProvider();
             const verificationId = await phoneProvider.verifyPhoneNumber(
                 formattedPhoneNumber,
                 recaptchaVerifier.current
@@ -42,11 +42,11 @@ export default function SignUpScreen({ navigation }) {
 
     let confirmVerificationCode = async () => {
         try {
-            const credential = firebase.auth.PhoneAuthProvider.credential(
+            const credential = auth.PhoneAuthProvider.credential(
                 verificationId,
                 verificationCode
             );
-            await firebase.auth().signInWithCredential(credential).then((userCredential) => {
+            await auth().signInWithCredential(credential).then((userCredential) => {
                 db.collection("Users").doc(userCredential.user.phoneNumber).set({
                     groups: []
                 })

@@ -1,14 +1,16 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "web": "expo start --web",
     "eject": "expo eject"
   },
   "dependencies": {
     "@react-native-community/masked-view": "0.1.10",
+    "@react-native-firebase/app": "^12.7.3",
+    "@react-native-firebase/auth": "^12.7.3",
+    "@react-native-firebase/firestore": "^12.7.3",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
     "country-telephone-data": "^0.6.3",
@@ -20,11 +22,11 @@
     "expo-notifications": "~0.11.6",
     "expo-splash-screen": "~0.10.2",
     "expo-status-bar": "~1.0.4",
-    "firebase": "8.2.3",
+    "expo-updates": "~0.5.4",
     "node-fetch": "^2.6.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-41.0.0.tar.gz",
+    "react-native": "~0.63.4",
     "react-native-button-toggle-group": "^1.1.1",
     "react-native-dropdown-picker": "^5.1.21",
     "react-native-elements": "^3.4.2",
@@ -40,11 +42,14 @@
     "react-native-reanimated": "~2.1.0",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.0.0",
+    "react-native-unimodules": "~0.13.3",
     "react-native-web": "~0.13.12",
     "react-native-webview": "11.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
   },
-  "private": true
+  "private": true,
+  "name": "debt-balance-app",
+  "version": "1.0.0"
 }
