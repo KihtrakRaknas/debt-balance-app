@@ -28,7 +28,8 @@ export default function SignUpScreen({ navigation }) {
         try {
             console.log("verificationIdStart")
             console.log(formattedPhoneNumber)
-            const verificationId = await auth().verifyPhoneNumber(
+            // const verificationId = await auth().verifyPhoneNumber(
+            const verificationId = await auth().signInWithPhoneNumber(
                 formattedPhoneNumber
                 // recaptchaVerifier.current
             );
@@ -46,12 +47,13 @@ export default function SignUpScreen({ navigation }) {
 
     let confirmVerificationCode = async () => {
         try {
-            const credential = auth.PhoneAuthProvider.credential(
-                verificationId.verificationId,
-                verificationCode
-            );
+            // const credential = auth.PhoneAuthProvider.credential(
+            //     verificationId.verificationId,
+            //     verificationCode
+            // );
             // await auth().signInWithCredential(credential).then((userCredential) => {
-            auth().currentUser.linkWithCredential(credential).then((userCredential) => {
+            // auth().currentUser.linkWithCredential(credential).then((userCredential) => {
+            verificationId.confirm(verificationCode).then((userCredential) => {
                 db.collection("Users").doc(userCredential.user.phoneNumber).set({
                     groups: []
                 })
