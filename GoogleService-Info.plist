@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>135371147288-t9031q9iopes0bq5tr514btvlaks89h5.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.135371147288-t9031q9iopes0bq5tr514btvlaks89h5</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCt0tzHjsXJmKdpGQPLZgr-V8UNWrJxDIM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>135371147288</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.kihtrakraknas.debt-balance</string>
+	<key>PROJECT_ID</key>
+	<string>debt-balance</string>
+	<key>STORAGE_BUCKET</key>
+	<string>debt-balance.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:135371147288:ios:6101939e05391d50851b6d</string>
+</dict>
+</plist>
