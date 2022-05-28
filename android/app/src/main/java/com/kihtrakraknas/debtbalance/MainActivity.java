@@ -1,8 +1,7 @@
 package com.kihtrakraknas.debtbalance;
 import expo.modules.devmenu.react.DevMenuAwareReactActivity;
-import expo.modules.devlauncher.DevLauncherController;
-import android.content.res.Configuration;
 import android.content.Intent;
+import expo.modules.devlauncher.DevLauncherController;
 
 import android.os.Bundle;
 
@@ -14,7 +13,6 @@ import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
 import expo.modules.splashscreen.singletons.SplashScreen;
 import expo.modules.splashscreen.SplashScreenImageResizeMode;
 
-
 public class MainActivity extends DevMenuAwareReactActivity {
 
   @Override
@@ -24,16 +22,6 @@ public class MainActivity extends DevMenuAwareReactActivity {
       }
       super.onNewIntent(intent);
   }
-
-
-    // Added automatically by Expo Config
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Intent intent = new Intent("onConfigurationChanged");
-        intent.putExtra("newConfig", newConfig);
-        sendBroadcast(intent);
-    }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
