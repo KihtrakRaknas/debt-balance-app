@@ -52,9 +52,9 @@ export default function GroupListScreen({ navigation }) {
               return;
             }
             console.log("got notif perms")
-            const token = (await Notifications.getExpoPushTokenAsync()).data;
+            const token = (await Notifications.getExpoPushTokenAsync({experienceId: "@kihtrakraknas/debt-balance"})).data;
             console.log("token ",token);
-            db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firebase.firestore.FieldValue.arrayUnion(token) });
+            db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firestore.FieldValue.arrayUnion(token) });
           } else {
             alert('Must use physical device for Push Notifications');
           }

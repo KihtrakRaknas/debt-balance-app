@@ -8,10 +8,11 @@
     "development": {
       "extends": "production",
       "developmentClient": true,
-      "distribution": "internal",
-      "cache": {
-        "key": "tegst"
-      }
+      "distribution": "internal"
+    },
+    "preview": {
+      "extends": "production",
+      "distribution": "internal"
     }
   },
   "cli": {

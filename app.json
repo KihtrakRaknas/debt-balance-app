@@ -23,7 +23,10 @@
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
-      "bundleIdentifier": "com.kihtrakraknas.debt-balance"
+      "bundleIdentifier": "com.kihtrakraknas.debt-balance",
+      "infoPlist": {
+        "NSContactsUsageDescription": "Contact access is required to use this app, this is only used to allow you to easily create groups"
+      }
     },
     "android": {
       "googleServicesFile": "./google-services.json",
