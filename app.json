@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cash Balancer",
     "slug": "debt-balance",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -25,7 +25,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.kihtrakraknas.debt-balance",
       "infoPlist": {
-        "NSContactsUsageDescription": "Contact access is required to use this app, this is only used to allow you to easily create groups"
+        "NSContactsUsageDescription": "Contact access is required to use this app, this is only used to allow you to easily create groups",
+        "NSNotificationDescription": "This app uses notifications to notify you of any transactions involving you"
       }
     },
     "android": {
@@ -35,7 +36,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.kihtrakraknas.debtbalance"
+      "package": "com.kihtrakraknas.debtbalance",
+      "permissions": ["READ_CONTACTS"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
