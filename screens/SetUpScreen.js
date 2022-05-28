@@ -16,6 +16,8 @@ export default function Settings({ navigation }) {
     useEffect(() => {
         profileRef.onSnapshot((doc) => {
             setName(doc.data()?.name)
+        }, (err) => {
+            console.log("error getting name", err)
         })
     }, [true])
 

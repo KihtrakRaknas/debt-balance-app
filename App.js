@@ -115,6 +115,8 @@ export default function App() {
             console.log("Profile found")
             setUserAccountSetUp(true)
           }
+        }, (err) => {
+          console.log("Error getting profile:", err);
         });
       } else {
         setTimeout(() => SplashScreen.hideAsync().catch(), 500)

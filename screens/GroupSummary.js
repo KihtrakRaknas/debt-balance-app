@@ -72,6 +72,8 @@ export default function GroupSummary({ navigation, route }) {
     useEffect(() => {
         return groupRef.onSnapshot((doc) => {
             setGroupInfo(doc.data())
+        }, (err) => {
+            console.log("Error getting group info: ", err)
         })
     }, [true]);
 

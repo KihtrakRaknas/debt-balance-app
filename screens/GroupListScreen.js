@@ -138,9 +138,13 @@ export default function GroupListScreen({ navigation }) {
                         // doc.data() will be undefined in this case
                         console.log("No such document!");
                     }
+                }, (err) => {
+                    console.log("Error getting group document:", err);   
                 })
                 listeners.push(listener)
             })
+        }, (err) => {
+            console.log("Error getting profile document:", err);   
         })
         listeners.push(profileListener)
         return ()=>{
@@ -219,6 +223,7 @@ export default function GroupListScreen({ navigation }) {
         <FlatList style={styles.flatList}
             data={groups}
             keyExtractor={(item, index) => "" + index}
+            ListEmptyComponent={() => <View style={{flex:1, justifyContent: 'center', alignItems: 'center', marginTop: 50, padding: 50}}><Text style={{textAlign:"center", color:"green", fontSize:30}}>{`Create a group to get started!\n\nFriends who have the app will automatically populate the modal!`}</Text></View>}
             renderItem={({ item, index }) => {
                 const memberUIDs = Object.keys(item.members).sort();
                 let title = ''
@@ -260,7 +265,7 @@ export default function GroupListScreen({ navigation }) {
                 // console.log(`faces: ${JSON.stringify(faces)}`)
 
                 return (
-                    <ListItem style={{ borderRadius: 20, marginVertical: 5 }} bottomDivider topDivider onPress={() => {
+                    <ListItem style={{ borderRadius: 20, marginVertical: 5, marginHorizontal: 5 }} bottomDivider topDivider onPress={() => {
                         // navigation.closeDrawer()
                         navigation.navigate('Summary',{groupUid: item.groupID, faces})
                     }}

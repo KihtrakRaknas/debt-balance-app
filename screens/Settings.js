@@ -15,10 +15,13 @@ export default function Settings({ navigation }) {
     const profileRef = db.collection("Users").doc(user.phoneNumber);
 
     useEffect(() => {
-        profileRef.onSnapshot((doc) => {
+        const unsub = profileRef.onSnapshot((doc) => {
             setName(doc.data()?.name)
+        }, (err) => {
+            console.log("error getting name", err)
         })
-    }, [true])
+        return () => unsub()
+    }, [user])
 
     return (<LinearGradient colors={['#00ff0030', '#00ff0010']} style={{ flex: 1, resizeMode: "cover", justifyContent: "center" }}><KeyboardAvoidingView style={[styles.container]} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <View style={[styles.textContainer, { marginBottom: 30, marginTop: 30 }]}><Text style={styles.titleText}>Settings</Text></View>
