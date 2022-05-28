@@ -183,7 +183,7 @@ export default function GroupSummary({ navigation, route }) {
             amount:Number(balanceText.substring(1))
         }
         console.log(transaction)
-        groupRef.update({transactions:firebase.firestore.FieldValue.arrayUnion(transaction)}).then(()=>setNewTransactionVisible(false))
+        groupRef.update({transactions:firestore.FieldValue.arrayUnion(transaction)}).then(()=>setNewTransactionVisible(false))
     }
 
     return (<View style={styles.container}>
