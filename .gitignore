@@ -71,3 +71,7 @@ buck-out/
 web-build/
 
 # @end expo-cli
+
+credentials.json
+
+@kihtrakraknas__debt-balance.jks

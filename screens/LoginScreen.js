@@ -119,9 +119,8 @@ export default function SignUpScreen({ navigation }) {
             </> : <>
                 <View style={styles.textContainer}><Text style={styles.subtitleText}>Almost there! Just enter the verification code that was texted to you</Text></View>
                 <TextInput
-                    style={{ marginVertical: 10, fontSize: 17 }}
+                    style={[styles.textInput, { marginVertical: 10, fontSize: 17 }]}
                     placeholder="Verification Code"
-                    style={styles.textInput}
                     onChangeText={(text) => {
                         console.log(text)
                         setVerificationCode(text)

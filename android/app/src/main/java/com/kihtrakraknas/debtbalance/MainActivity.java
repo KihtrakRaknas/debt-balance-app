@@ -1,4 +1,6 @@
 package com.kihtrakraknas.debtbalance;
+import expo.modules.devmenu.react.DevMenuAwareReactActivity;
+import expo.modules.devlauncher.DevLauncherController;
 import android.content.res.Configuration;
 import android.content.Intent;
 
@@ -13,7 +15,16 @@ import expo.modules.splashscreen.singletons.SplashScreen;
 import expo.modules.splashscreen.SplashScreenImageResizeMode;
 
 
-public class MainActivity extends ReactActivity {
+public class MainActivity extends DevMenuAwareReactActivity {
+
+  @Override
+  public void onNewIntent(Intent intent) {
+      if (DevLauncherController.tryToHandleIntent(this, intent)) {
+         return;
+      }
+      super.onNewIntent(intent);
+  }
+
 
     // Added automatically by Expo Config
     @Override
@@ -44,11 +55,11 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected ReactActivityDelegate createReactActivityDelegate() {
-        return new ReactActivityDelegate(this, getMainComponentName()) {
+        return DevLauncherController.wrapReactActivityDelegate(this, () -> new ReactActivityDelegate(this, getMainComponentName()) {
             @Override
             protected ReactRootView createRootView() {
                 return new RNGestureHandlerEnabledRootView(MainActivity.this);
             }
-        };
+        });
     }
 }

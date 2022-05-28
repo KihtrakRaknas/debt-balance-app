@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert, KeyboardAvoidingView, ImageBackground } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
+// import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import PhoneInput from "react-native-phone-number-input";
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Notifications from 'expo-notifications';
@@ -33,9 +33,8 @@ export default function Settings({ navigation }) {
         </Text></View>}
         {/* <View style={styles.textContainer}><Text style={styles.subtitleText}>Change your name or sign out</Text></View> */}
         <TextInput
-            style={{ marginVertical: 10, fontSize: 17 }}
+            style={[{ marginVertical: 10, fontSize: 17 }, styles.textInput]}
             placeholder="Name"
-            style={styles.textInput}
             onChangeText={(text) => {
                 console.log(text)
                 setName(text)
@@ -50,7 +49,7 @@ export default function Settings({ navigation }) {
         <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={async () => {
             console.log("Sign out")
             try{
-                const token = (await Notifications.getExpoPushTokenAsync()).data;
+                const token = (await Notifications.getExpoPushTokenAsync({experienceId: "@kihtrakraknas/debt-balance"})).data;
                 db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firestore.FieldValue.arrayRemove(token) }).then(() => {
                     auth().signOut()
                 }).catch((error) => {

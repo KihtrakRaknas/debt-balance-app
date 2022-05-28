@@ -17,7 +17,12 @@
       "**/*"
     ],
     "plugins": [
-      "@react-native-firebase/app"
+      "@react-native-firebase/app",
+      [
+        "expo-notifications",
+        {
+        }
+      ]
     ],
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",

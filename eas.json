@@ -1,9 +1,20 @@
 {
   "build": {
-    "release": {},
+    "production": {
+      "ios":{
+        "cocoapods": "1.10.2"
+      }
+    },
     "development": {
+      "extends": "production",
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "cache": {
+        "key": "tegst"
+      }
     }
+  },
+  "cli": {
+    "version": ">= 0.52.0"
   }
 }

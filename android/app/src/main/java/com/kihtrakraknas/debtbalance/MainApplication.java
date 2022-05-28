@@ -1,4 +1,5 @@
 package com.kihtrakraknas.debtbalance;
+import expo.modules.devlauncher.DevLauncherController;
 
 import android.app.Application;
 import android.content.Context;
@@ -92,6 +93,7 @@ public class MainApplication extends Application implements ReactApplication {
       UpdatesController.initialize(this);
     }
 
+    DevLauncherController.initialize(this, getReactNativeHost());
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
   }
 
