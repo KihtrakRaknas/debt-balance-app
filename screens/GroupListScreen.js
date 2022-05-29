@@ -243,7 +243,7 @@ export default function GroupListScreen({ navigation }) {
 
                 const balance = item.members[auth().currentUser.phoneNumber]?.balance
 
-                const faces = memberUIDs.filter(el=>el!=auth().currentUser.phoneNumber).map(number => {
+                let faces = memberUIDs.filter(el=>el!=auth().currentUser.phoneNumber).map(number => {
                     const digits = number.substring(number.length - 10, number.length)
                     const contact = contacts.find(el => {
                         if (!el)
@@ -258,9 +258,22 @@ export default function GroupListScreen({ navigation }) {
                     return ({
                         id: number,
                         // name: item.members[number]?.name,
-                        imageUrl: image
+                        imageUrl: image,
+                        notURL:false
                     })
                 })
+
+                allNull = faces.length > 1
+                for(let face of faces){
+                    if(face.imageUrl != null){
+                        allNull = false
+                        break
+                    }
+                }
+                if(allNull){
+                    console.log(title)
+                    faces = [{id:Math.random(), image:require('../assets/group.jpg'), notURL:true}]
+                }
 
                 // console.log(`faces: ${JSON.stringify(faces)}`)
 
@@ -277,7 +290,10 @@ export default function GroupListScreen({ navigation }) {
                         ViewComponent={LinearGradient}
                         containerStyle={{ borderRadius: 20 }}
                     >
-                        {faces.length == 1 && <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl?faces[0].imageUrl:"a" }} />}
+                        {faces.length == 1 && faces[0].notURL?
+                            <Avatar size="medium" rounded title={title.substring(0, 2)} source={require('../assets/group.jpg')} />
+                        :
+                            <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl?faces[0].imageUrl:"a" }} />}
                         {faces.length > 1 && <View style={{ marginRight: 20 }}><FacePile numFaces={2} faces={faces} /></View>}
                         <ListItem.Content>
                             <ListItem.Title style={styles.listItemTitle}>{title}</ListItem.Title>

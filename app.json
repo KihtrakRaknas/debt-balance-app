@@ -38,6 +38,9 @@
         "image": "./assets/debt-balance-splash.png",
         "resizeMode": "cover",
         "backgroundColor": "#ffffff"
+      },
+      "adaptiveIcon":{
+        "foregroundImage": "./assets/high-res-icon-trans.png"
       }
     },
     "web": {
