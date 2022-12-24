@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert, Platform } from 'react-native';
-import { ListItem, Avatar, Badge, Button } from 'react-native-elements';
+import { ListItem, Badge, Button } from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { FAB } from 'react-native-paper';
@@ -12,6 +12,7 @@ import displayMoney from '../helpers/displayMoney'
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import {MainStackLoadedContext} from '../helpers/contexts'
+import { Avatar } from "@rneui/themed";
 
 export default function GroupListScreen({ navigation }) {
     const [groups, setGroups] = React.useState([]);
@@ -259,7 +260,6 @@ export default function GroupListScreen({ navigation }) {
                         id: number,
                         // name: item.members[number]?.name,
                         imageUrl: image,
-                        notURL:false
                     })
                 })
 
@@ -272,8 +272,9 @@ export default function GroupListScreen({ navigation }) {
                 }
                 if(allNull){
                     console.log(title)
-                    faces = [{id:Math.random(), image:require('../assets/group.jpg'), notURL:true}]
+                    faces = [{id:Math.random(), imageUrl:Image.resolveAssetSource(require('../assets/group.jpg')).uri}]
                 }
+                console.log(title, faces)
 
                 // console.log(`faces: ${JSON.stringify(faces)}`)
 
@@ -290,10 +291,7 @@ export default function GroupListScreen({ navigation }) {
                         ViewComponent={LinearGradient}
                         containerStyle={{ borderRadius: 20 }}
                     >
-                        {faces.length == 1 && faces[0].notURL?
-                            <Avatar size="medium" rounded title={title.substring(0, 2)} source={require('../assets/group.jpg')} />
-                        :
-                            <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl?faces[0].imageUrl:"a" }} />}
+                        {faces.length == 1 && <Avatar size="medium" rounded title={title.substring(0, 2)} source={{ uri: faces[0].imageUrl?faces[0].imageUrl:"a" }} />}
                         {faces.length > 1 && <View style={{ marginRight: 20 }}><FacePile numFaces={2} faces={faces} /></View>}
                         <ListItem.Content>
                             <ListItem.Title style={styles.listItemTitle}>{title}</ListItem.Title>
