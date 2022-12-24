@@ -250,12 +250,11 @@ export default function GroupListScreen({ navigation }) {
                         if (!el)
                             return false
                         return el?.phoneNumbers?.some(el => {
-                            const elDigits = "" + el?.[nameOfNumberInContacts]
+                            const elDigits = "" + el?.[nameOfNumberInContacts].replace(/-/g, '')
                             return elDigits.substring(elDigits.length - 10, elDigits.length) == digits
                         })
                     })
                     const image = contact?.image?.uri // contact?.image?.uri?contact.image?.uri:require('../assets/icon.png')
-                    // console.log(image)
                     return ({
                         id: number,
                         // name: item.members[number]?.name,

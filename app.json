@@ -33,18 +33,25 @@
       "googleServicesFile": "./google-services.json",
       "versionCode": 1,
       "package": "com.kihtrakraknas.debtbalance",
-      "permissions": ["READ_CONTACTS"],
+      "permissions": [
+        "READ_CONTACTS"
+      ],
       "splash": {
         "image": "./assets/debt-balance-splash.png",
         "resizeMode": "cover",
         "backgroundColor": "#ffffff"
       },
-      "adaptiveIcon":{
+      "adaptiveIcon": {
         "foregroundImage": "./assets/high-res-icon-trans.png"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cc0a9924-8e87-4b75-88ca-0b7da5990afa"
+      }
     }
   }
 }
