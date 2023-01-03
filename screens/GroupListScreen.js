@@ -41,6 +41,14 @@ export default function GroupListScreen({ navigation }) {
     useEffect(()=>{
         (async()=>{
         console.log("running notif code")
+          if (Platform.OS === 'android') {
+            Notifications.setNotificationChannelAsync('default', {
+              name: 'default',
+              importance: Notifications.AndroidImportance.MAX,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: '#FF231F7C',
+            });
+          }
           if (Constants.isDevice) {
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
@@ -58,15 +66,6 @@ export default function GroupListScreen({ navigation }) {
             db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firestore.FieldValue.arrayUnion(token) });
           } else {
             alert('Must use physical device for Push Notifications');
-          }
-        
-          if (Platform.OS === 'android') {
-            Notifications.setNotificationChannelAsync('default', {
-              name: 'default',
-              importance: Notifications.AndroidImportance.MAX,
-              vibrationPattern: [0, 250, 250, 250],
-              lightColor: '#FF231F7C',
-            });
           }
         })();
     },[true])
