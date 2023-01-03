@@ -133,7 +133,7 @@ export default function App() {
     <NavigationContainer screenOptions={{ headerShown: true }}>
       <MainStackLoadedContext.Provider value={mainStackLoadedRef}>
         {!signedIn ? (
-          <Stack.Navigator>
+          <Stack.Navigator name="root">
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
           </Stack.Navigator>
         ) : userAccountSetUp ? (
