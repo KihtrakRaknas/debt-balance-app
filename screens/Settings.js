@@ -65,6 +65,24 @@ export default function Settings({ navigation }) {
         }} >
             <Text style={styles.confirmButtonText}>Sign Out</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={async () => {
+            console.log("Sign out")
+            user.getIdToken(true)
+            .then((idToken) => fetch('https://cashbalancerapi.kihtrak.com/deleteAccount', {
+                method: 'post',
+                body:    JSON.stringify({idToken}),
+                headers: { 'Content-Type': 'application/json' },
+            }))
+            .then(res => res.json())
+            .then(json => {
+                console.log(json)
+                if(json?.error)
+                    Alert.alert(json?.error)
+            });
+            
+        }} >
+            <Text style={styles.confirmButtonText}>Delete Account</Text>
+        </TouchableOpacity>
     </KeyboardAvoidingView></LinearGradient>)
 }
 
