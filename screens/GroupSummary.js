@@ -51,7 +51,7 @@ export default function GroupSummary({ navigation, route }) {
                                 let number=cleanNumber(contact.phoneNumbers[phoneNumberIndex][nameOfNumberInContacts])
                                 if(number==auth().currentUser.phoneNumber)
                                     continue;
-                                promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
+                                promises.push(fetch(`https://cashbalancerapi.kihtrak.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
                                     if(text == "true"&&!seen.includes(number)){
                                         console.log("Exists "+number)
                                         array.push(contact)

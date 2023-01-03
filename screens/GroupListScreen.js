@@ -88,7 +88,7 @@ export default function GroupListScreen({ navigation }) {
                                 let number=cleanNumber(contact.phoneNumbers[phoneNumberIndex][nameOfNumberInContacts])
                                 if(number==auth().currentUser.phoneNumber)
                                     continue;
-                                promises.push(fetch(`https://makegroup.herokuapp.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
+                                promises.push(fetch(`https://cashbalancerapi.kihtrak.com/check?number=${number}`,).then(res=>res.text()).then(text => { 
                                     if(text == "true"&&!seen.includes(number)){
                                         console.log("Exists "+number)
                                         // console.log(contact)
@@ -199,7 +199,7 @@ export default function GroupListScreen({ navigation }) {
                     <Button
                         onPress={()=>{
                             const body = { numbers: [...membersToAdd,auth().currentUser.phoneNumber] };
-                            fetch('https://makegroup.herokuapp.com/', {
+                            fetch('https://cashbalancerapi.kihtrak.com/', {
                                     method: 'post',
                                     body:    JSON.stringify(body),
                                     headers: { 'Content-Type': 'application/json' },
