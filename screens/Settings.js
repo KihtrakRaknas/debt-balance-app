@@ -78,7 +78,7 @@ export default function Settings({ navigation }) {
                 if(json?.error)
                     Alert.alert(json?.error)
                 else
-                    navigation.navigate("root",{screen:"LoginScreen"})
+                    auth().currentUser.reload()
             });
             
         }} >
