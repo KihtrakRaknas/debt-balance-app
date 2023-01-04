@@ -78,7 +78,9 @@ export default function Settings({ navigation }) {
                 if(json?.error)
                     Alert.alert(json?.error)
                 else
-                    auth().currentUser.reload()
+                    auth().currentUser.reload().then().catch((err)=>{
+                        console.log(err)
+                    })
             });
             
         }} >
