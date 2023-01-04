@@ -52,6 +52,7 @@ export default function Settings({ navigation }) {
         <TouchableOpacity style={[styles.cancelButtonContainer]} onPress={async () => {
             console.log("Sign out")
             try{
+                //auth().signOut()
                 const token = (await Notifications.getExpoPushTokenAsync({experienceId: "@kihtrakraknas/debt-balance"})).data;
                 db.collection('Users').doc(auth().currentUser.phoneNumber).update({ tokens: firestore.FieldValue.arrayRemove(token) }).then(() => {
                     auth().signOut()
@@ -78,8 +79,10 @@ export default function Settings({ navigation }) {
                 if(json?.error)
                     Alert.alert(json?.error)
                 else
-                    auth().currentUser.reload().then().catch((err)=>{
-                        console.log(err)
+                    auth().signOut().then(res=>{
+                        console.log("SUCCESS", res)
+                    }).catch((err)=>{
+                        console.log("ERR",err.message)
                     })
             });
             

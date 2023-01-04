@@ -123,26 +123,29 @@ export default function GroupListScreen({ navigation }) {
         let listeners = []
         const profileListener = profileRef.onSnapshot((doc) => {
             setGroups([])
-            doc.data().groups.forEach(groupID => {
-                const docRef = db.collection("Groups").doc(groupID);
-                const listener = docRef.onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const { members, transactions } = doc.data()
-                        setGroups((groups) => {
-                            const indToDel = groups.findIndex(el=>el.groupID == groupID)
-                            if(indToDel != -1)
-                                groups.splice(indToDel,1)
-                            return([...groups, { members, transactionsLength: transactions.length, groupID }].sort((a, b) => b?.transactionsLength - a?.transactionsLength))
-                        })
-                    } else {
-                        // doc.data() will be undefined in this case
-                        console.log("No such document!");
-                    }
-                }, (err) => {
-                    console.log("Error getting group document:", err);   
+            if(doc&&doc.data()){
+                doc.data().groups.forEach(groupID => {
+                    const docRef = db.collection("Groups").doc(groupID);
+                    const listener = docRef.onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const { members, transactions } = doc.data()
+                            setGroups((groups) => {
+                                const indToDel = groups.findIndex(el=>el.groupID == groupID)
+                                if(indToDel != -1)
+                                    groups.splice(indToDel,1)
+                                return([...groups, { members, transactionsLength: transactions.length, groupID }].sort((a, b) => b?.transactionsLength - a?.transactionsLength))
+                            })
+                        } else {
+                            // doc.data() will be undefined in this case
+                            console.log("No such document!");
+                        }
+                    }, (err) => {
+                        console.log("Error getting group document:", err);   
+                    })
+                    listeners.push(listener)
                 })
-                listeners.push(listener)
-            })
+            }
+            
         }, (err) => {
             console.log("Error getting profile document:", err);   
         })
