@@ -168,6 +168,7 @@ export default function GroupListScreen({ navigation }) {
         >
             <TouchableOpacity style={[styles.centeredView]} onPressOut={() => { setAdd(false) }} activeOpacity={1} >
                 <View style={styles.modalView}>
+                    {contacts.length > 0?
                     <CustomMultiPicker
                         options={contacts.map(el => {
                             return el.name
@@ -198,7 +199,7 @@ export default function GroupListScreen({ navigation }) {
                         selectedIconName={"ios-checkmark-circle-outline"}
                         unselectedIconName={"ios-radio-button-off-outline"}
                         scrollViewHeight={"80%"}
-                    />
+                    />:<Text style={{textAlign:"center", color:"green", fontSize:30, flex:1, paddingVertical:50}}>Looks like no one in your contacts is using the app yet.</Text>}
                     <Button
                         onPress={()=>{
                             const body = { numbers: [...membersToAdd,auth().currentUser.phoneNumber] };
@@ -218,6 +219,7 @@ export default function GroupListScreen({ navigation }) {
                         }}
                         title="Create Group"
                         color="#841584"
+                        disabled={membersToAdd.length==0}
                     />
                 </View>
             </TouchableOpacity>
